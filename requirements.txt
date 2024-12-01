@@ -2,3 +2,5 @@ pillow
 numpy
 roifile
 matplotlib
+scipy
+scikit-image
