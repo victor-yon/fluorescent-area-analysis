@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 import numpy as np
 from numpy._typing import NDArray
 
-from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, batch_iterator
+from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, batch_iterator, save_results
 from plots import plot_data
 
 
@@ -80,15 +80,17 @@ def area_processing(
 
 if __name__ == '__main__':
     # Example usage for one image and one ROI
-    example_data = open_image('tests/examples/crusI-left/Default/img_channel002_position000_time000000000_z000.tif')
-    example_roi = open_roi('tests/examples/crusI-left/Default/0982-1002.roi')
-    area_processing(example_data, example_roi, threshold=1050)
+    # example_data = open_image('tests/examples/crusI-left/Default/img_channel002_position000_time000000000_z000.tif')
+    # example_roi = open_roi('tests/examples/crusI-left/Default/0982-1002.roi')
+    # area_processing(example_data, example_roi, threshold=1050)
 
     # Example usage for processing multiple images and ROIs
-    # results_csv = area_batch_processing(
-    #     data_dir='data/sample',
-    #     mouse_filter='mouse1',
-    #     area_filter='*',
-    #     threshold=1050
-    # )
-    # save_results(out_directory='out', file_name='results.csv', results=results_csv)
+    threshold = 1050
+    results_csv = area_batch_processing(
+        data_dir='../data',
+        mouse_filter='*',
+        area_filter='*',
+        threshold=threshold
+    )
+    save_results(out_directory='../out', file_name='results.csv', results=results_csv,
+                 metadata={'threshold': threshold})

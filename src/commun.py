@@ -84,15 +84,17 @@ def save_results(
     file_path = out_directory / file_name
     with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
+
+        if metadata is not None:
+            # Write metadata as a comment
+            for key, value in metadata.items():
+                writer.writerow([f'# {key}: {value}'])
+
         # Write header
         writer.writerow(results.keys())
         # Write data
         rows = zip(*results.values())
         writer.writerows(rows)
-
-    if metadata is not None:
-        with open(file_path.with_suffix('_metadata.json'), 'w') as file:
-            json.dump(metadata, file, indent=4)
 
     print(f'Result saved in "{file_path.resolve()}"')
 
@@ -130,7 +132,7 @@ def batch_iterator(
     if not data_dir.is_dir():
         raise FileNotFoundError(f'Invalid data directory: "{data_dir.resolve()}".')
 
-    mouse_directories = list(data_dir.glob(mouse_filter))
+    mouse_directories = [d for d in data_dir.glob(mouse_filter) if d.is_dir()]
     nb_mouse_found = len(mouse_directories)
 
     if nb_mouse_found == 0:
@@ -148,7 +150,7 @@ def batch_iterator(
         nb_area_processed = 0
 
         if nb_area_found == 0:
-            raise RuntimeError(f'No area subfolder found in "{mouse_directory.resolve()}" with filter "{area_filter}".')
+            warning(f'No area subfolder found in "{mouse_directory.resolve()}" with filter "{area_filter}".')
         elif nb_area_found == 1:
             print(f'1 area subfolder found in the directory "{mouse_directory.resolve()}".')
         else:
