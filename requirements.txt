@@ -4,3 +4,5 @@ roifile
 matplotlib
 scipy
 scikit-image
+pandas
+seaborn
