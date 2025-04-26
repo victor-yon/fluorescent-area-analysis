@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 import numpy as np
-from matplotlib import pyplot as plt
 from numpy._typing import NDArray
 from skimage.measure import label
 from skimage.morphology import remove_small_objects
@@ -11,7 +10,8 @@ from skimage.segmentation import watershed
 
 from scipy.ndimage import gaussian_filter, distance_transform_edt
 
-from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, plot_data, save_results, batch_iterator
+from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, save_results, batch_iterator
+from plots import plot_data
 
 
 def particles_batch_processing(

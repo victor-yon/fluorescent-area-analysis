@@ -4,7 +4,8 @@ from typing import Dict, List, Any
 import numpy as np
 from numpy._typing import NDArray
 
-from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, save_results, plot_data, batch_iterator
+from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, batch_iterator
+from plots import plot_data
 
 
 def area_batch_processing(

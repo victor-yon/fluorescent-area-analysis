@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import ticker
+from numpy._typing import NDArray
 from scipy import stats
 import tempfile
 import unittest
@@ -22,6 +23,50 @@ BAR_COLORS = {
     'rotarod control': '#17becf',  # Turquoise
     'rotarod': '#2ca02c'  # Green
 }
+
+def plot_data(data: NDArray, roi: NDArray, thr_mask: NDArray[bool],
+              thr_and_roi_mask: NDArray[bool] = None, particles_labels: NDArray[bool] = None) -> None:
+    """
+    Plot the original image, the original image with ROI, the threshold mask, and the combined threshold & ROI mask.
+
+    :param data: Original image data as a numpy array.
+    :param roi: ROI coordinates as a numpy array.
+    :param thr_mask: Threshold mask as a numpy array.
+    :param thr_and_roi_mask: Combined threshold and ROI mask as a numpy array.
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+
+    # 1. Original Image
+    axes[0, 0].imshow(data, cmap='seismic')
+    axes[0, 0].set_title("Original Image")
+    axes[0, 0].axis('off')
+
+    # 2. Original Image with ROI
+    axes[0, 1].imshow(data, cmap='seismic')
+    axes[0, 1].set_title("Original Image with ROI")
+    roi_polygon = plt.Polygon(roi, fill=None, edgecolor='r', linewidth=2)
+    axes[0, 1].add_patch(roi_polygon)
+    axes[0, 1].axis('off')
+
+    # 3. Threshold Mask
+    axes[1, 0].imshow(thr_mask, cmap='gray')
+    axes[1, 0].set_title("Threshold Mask")
+    axes[1, 0].axis('off')
+
+    # 4. Combined Threshold & ROI Mask
+    if thr_and_roi_mask is not None:
+        axes[1, 1].imshow(thr_and_roi_mask, cmap='gray')
+        axes[1, 1].set_title("Threshold + ROI Mask")
+        axes[1, 1].axis('off')
+
+    # 4. Combined Threshold & ROI Mask with particles
+    if particles_labels is not None:
+        axes[1, 1].imshow(particles_labels, cmap='prism', alpha=0.5)
+        axes[1, 1].set_title("Particles")
+        axes[1, 1].axis('off')
+
+    plt.tight_layout()
+    plt.show()
 
 
 def infer_group_from_mouse_name(mouse_name):
@@ -48,11 +93,11 @@ def load_and_prepare(csv_path):
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
     df = pd.read_csv(csv_path)
 
-    # Derive group if missing
+    # Derive a group if missing
     if 'group' not in df.columns:
         df['group'] = df['mouse_name'].apply(infer_group_from_mouse_name)
 
-    # Extract slice number from area_name if present
+    # Extract the slice number from area_name if present
     df['slice_number'] = df['area_name'].str.extract(r'slice(\d+)', expand=False)
     df['slice_number'] = pd.to_numeric(df['slice_number'], errors='coerce')
 

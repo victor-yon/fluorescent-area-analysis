@@ -1,7 +1,8 @@
 import csv
+import json
 from logging import warning
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Any
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -66,9 +67,18 @@ def get_roi_mask(img_array: NDArray, roi_coordinates: NDArray) -> NDArray[bool]:
     return mask
 
 
-def save_results(out_directory: Path | str, file_name: str, results) -> None:
+def save_results(
+        out_directory: Path | str,
+        file_name: str,
+        results: dict[str, Any],
+        metadata: dict[str, Any] = None
+) -> None:
     if isinstance(out_directory, str):
         out_directory = Path(out_directory)
+
+    if not file_name.lower().endswith('.csv'):
+        file_name += '.csv'
+
     # Writing to CSV file
     out_directory.mkdir(parents=True, exist_ok=True)
     file_path = out_directory / file_name
@@ -80,52 +90,11 @@ def save_results(out_directory: Path | str, file_name: str, results) -> None:
         rows = zip(*results.values())
         writer.writerows(rows)
 
+    if metadata is not None:
+        with open(file_path.with_suffix('_metadata.json'), 'w') as file:
+            json.dump(metadata, file, indent=4)
+
     print(f'Result saved in "{file_path.resolve()}"')
-
-
-def plot_data(data: NDArray, roi: NDArray, thr_mask: NDArray[bool],
-              thr_and_roi_mask: NDArray[bool] = None, particles_labels: NDArray[bool] = None) -> None:
-    """
-    Plot the original image, the original image with ROI, the threshold mask, and the combined threshold & ROI mask.
-
-    :param data: Original image data as a numpy array.
-    :param roi: ROI coordinates as a numpy array.
-    :param thr_mask: Threshold mask as a numpy array.
-    :param thr_and_roi_mask: Combined threshold and ROI mask as a numpy array.
-    """
-    fig, axes = plt.subplots(2, 2, figsize=(10, 10))
-
-    # 1. Original Image
-    axes[0, 0].imshow(data, cmap='seismic')
-    axes[0, 0].set_title("Original Image")
-    axes[0, 0].axis('off')
-
-    # 2. Original Image with ROI
-    axes[0, 1].imshow(data, cmap='seismic')
-    axes[0, 1].set_title("Original Image with ROI")
-    roi_polygon = plt.Polygon(roi, fill=None, edgecolor='r', linewidth=2)
-    axes[0, 1].add_patch(roi_polygon)
-    axes[0, 1].axis('off')
-
-    # 3. Threshold Mask
-    axes[1, 0].imshow(thr_mask, cmap='gray')
-    axes[1, 0].set_title("Threshold Mask")
-    axes[1, 0].axis('off')
-
-    # 4. Combined Threshold & ROI Mask
-    if thr_and_roi_mask is not None:
-        axes[1, 1].imshow(thr_and_roi_mask, cmap='gray')
-        axes[1, 1].set_title("Threshold + ROI Mask")
-        axes[1, 1].axis('off')
-
-    # 4. Combined Threshold & ROI Mask with particles
-    if particles_labels is not None:
-        axes[1, 1].imshow(particles_labels, cmap='prism', alpha=0.5)
-        axes[1, 1].set_title("particles")
-        axes[1, 1].axis('off')
-
-    plt.tight_layout()
-    plt.show()
 
 
 def batch_iterator(
