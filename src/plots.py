@@ -2,7 +2,7 @@ import os
 import sys
 import glob
 import argparse
-from typing import Literal
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
@@ -24,8 +24,16 @@ BAR_COLORS = {
     'rotarod': '#2ca02c'  # Green
 }
 
-def plot_data(data: NDArray, roi: NDArray, thr_mask: NDArray[bool],
-              thr_and_roi_mask: NDArray[bool] = None, particles_labels: NDArray[bool] = None) -> None:
+def plot_data(
+        data: NDArray,
+        roi: NDArray,
+        thr_mask: NDArray[bool],
+        thr_and_roi_mask: NDArray[bool] = None,
+        particles_labels: NDArray[bool] = None,
+        title: str = None,
+        show_plot: bool = True,
+        save_path: str | Path = None
+) -> None:
     """
     Plot the original image, the original image with ROI, the threshold mask, and the combined threshold & ROI mask.
 
@@ -37,8 +45,9 @@ def plot_data(data: NDArray, roi: NDArray, thr_mask: NDArray[bool],
     fig, axes = plt.subplots(2, 2, figsize=(10, 10))
 
     # 1. Original Image
+    x_shape, y_shape = data.shape
     axes[0, 0].imshow(data, cmap='seismic')
-    axes[0, 0].set_title("Original Image")
+    axes[0, 0].set_title(f"Original Image ({x_shape:,d}x{y_shape:,d}px)")
     axes[0, 0].axis('off')
 
     # 2. Original Image with ROI
@@ -49,29 +58,49 @@ def plot_data(data: NDArray, roi: NDArray, thr_mask: NDArray[bool],
     axes[0, 1].axis('off')
 
     # 3. Threshold Mask
+    nb_pixels = thr_mask.sum()
     axes[1, 0].imshow(thr_mask, cmap='gray')
-    axes[1, 0].set_title("Threshold Mask")
+    axes[1, 0].set_title(f"Threshold Mask ({nb_pixels:,d}px)")
     axes[1, 0].axis('off')
 
     # 4. Combined Threshold & ROI Mask
     if thr_and_roi_mask is not None:
+        nb_pixels = thr_and_roi_mask.sum()
         axes[1, 1].imshow(thr_and_roi_mask, cmap='gray')
-        axes[1, 1].set_title("Threshold + ROI Mask")
+        axes[1, 1].set_title(f"Threshold + ROI Masks ({nb_pixels:,d}px)")
         axes[1, 1].axis('off')
 
     # 4. Combined Threshold & ROI Mask with particles
     if particles_labels is not None:
+        nb_particles = len(np.unique(particles_labels)) - 1
         axes[1, 1].imshow(particles_labels, cmap='prism', alpha=0.5)
-        axes[1, 1].set_title("Particles")
+        axes[1, 1].set_title(f"Particles ({nb_particles:,d} particles)")
         axes[1, 1].axis('off')
 
-    plt.tight_layout()
-    plt.show()
+    if title:
+        fig.suptitle(title, fontsize=16)
 
+    plt.tight_layout()
+
+    if save_path:
+        if isinstance(save_path, str):
+            save_path = Path(save_path)
+
+        if not save_path.suffix:
+            save_path += '.png'
+
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+
+        plt.savefig(save_path, dpi=300)
+
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
 
 def infer_group_from_mouse_name(mouse_name):
     """
-    Determine group based on substrings in mouse_id.
+    Determine the group based on substrings in mouse_id.
     """
     lname = str(mouse_name).lower()
     if 'naive control' in lname:

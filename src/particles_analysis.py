@@ -82,6 +82,7 @@ def particles_processing(
         min_particle_size: float,
         markers_percentile: float,
         show_plot: bool = True,
+        save_plot_path: Path | str = None,
         silent: bool = False
 ) -> int:
     # Apply Gaussian filter
@@ -105,32 +106,82 @@ def particles_processing(
     # Count the number of particles
     num_particles = len(np.unique(labels)) - 1
 
-    # Plot the data
-    if show_plot:
-        plot_data(data, roi, thr_mask, thr_and_roi_mask, labels)
-
     if not silent:
         print(f"Number of particles: {num_particles}")
 
+    # Plot the data
+    if show_plot or save_plot_path is not None:
+        title = (f'Particles scan\nThreshold: {threshold}, Gaussian sigma: {gaussian_sigma}, '
+                 f'Min particle size: {min_particle_size}, Markers percentile: {markers_percentile}')
+        plot_data(data, roi, thr_mask, thr_and_roi_mask, labels, title=title, show_plot=show_plot,
+                  save_path=save_plot_path)
+
     return num_particles
+
+def save_all_particle_scans(
+        data_dir: Path | str,
+        out_dir: Path | str,
+        threshold: int,
+        gaussian_sigma: float,
+        min_particle_size: float,
+        markers_percentile: float,
+        mouse_filter: str = '*',
+        area_filter: str = '*'
+) -> None:
+    if isinstance(data_dir, str):
+        data_dir = Path(data_dir)
+
+    for roi, img_data, area_name, mouse_name in (
+            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
+    ):
+        img = img_data["ieg"]
+        file_name = Path(f'particles_{data_dir.name}_{mouse_name}_{area_name}.png')
+        particles_processing(img, roi, threshold, gaussian_sigma, min_particle_size, markers_percentile,
+                             show_plot=False, silent=True, save_plot_path=out_dir / file_name)
 
 
 if __name__ == '__main__':
-    # Example usage for one image and one ROI
-    example_data = open_image('data/L_CrusI_20x_center_left/Default/img_channel001_position000_time000000000_z000.tif')
-    example_roi = open_roi('data/L_CrusI_20x_center_left/Default/1006-0970.roi')
-    particles_processing(example_data, example_roi, threshold=1624,
-                         gaussian_sigma=2, min_particle_size=30, markers_percentile=90)
+    # Meta-parameters
+    dapi_threshold=1624
+    ieg_threshold=800
+    gaussian_sigma=2
+    min_particle_size=30
+    markers_percentile=90
 
-    results_csv = particles_batch_processing(
-        data_dir='data/Aug 25 2024 rotarod 20x',
-        mouse_filter='89887-1*',
-        area_filter='*lobule*',
-        dapi_threshold=1624,
-        ieg_threshold=800,
-        gaussian_sigma=2,
-        min_particle_size=30,
-        markers_percentile=90
+    # Plot all the data
+    save_all_particle_scans(
+        data_dir='../data',
+        out_dir='../out/particle_scans',
+        threshold=ieg_threshold,
+        gaussian_sigma=gaussian_sigma,
+        min_particle_size=min_particle_size,
+        markers_percentile=markers_percentile,
+        mouse_filter='*',
+        area_filter='*lobule8*'
     )
 
-    save_results(out_directory='out', file_name='particles_results.csv', results=results_csv)
+    # Example usage for one image and one ROI
+    # example_data = open_image('data/L_CrusI_20x_center_left/Default/img_channel001_position000_time000000000_z000.tif')
+    # example_roi = open_roi('data/L_CrusI_20x_center_left/Default/1006-0970.roi')
+    # particles_processing(example_data, example_roi, threshold=1624,
+    #                      gaussian_sigma=2, min_particle_size=30, markers_percentile=90)
+
+    # results_csv = particles_batch_processing(
+    #     data_dir='../data',
+    #     mouse_filter='*',
+    #     area_filter='*',
+    #     dapi_threshold=dapi_threshold,
+    #     ieg_threshold=ieg_threshold,
+    #     gaussian_sigma=gaussian_sigma,
+    #     min_particle_size=min_particle_size,
+    #     markers_percentile=markers_percentile
+    # )
+    #
+    # save_results(out_directory='../out', file_name='particles_results.csv', results=results_csv,
+    #              metadata={
+    #                 'dapi_threshold': dapi_threshold,
+    #                 'ieg_threshold': ieg_threshold,
+    #                 'gaussian_sigma': gaussian_sigma,
+    #                 'min_particle_size': min_particle_size,
+    #                 'markers_percentile': markers_percentile
+    #              })
