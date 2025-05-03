@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 import numpy as np
+from joblib import Parallel, delayed
 from numpy._typing import NDArray
 
 from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, batch_iterator, save_results
@@ -29,24 +30,28 @@ def area_batch_processing(
     :param channel: The channel number for the data file.
     :return: The statistics as a dictionary where the keys are the field names and the values are lists of values.
     """
-    # Prepare the result dictionary with empty lists
-    results = {'mouse_name': [], 'area_name': [], 'roi_rate': []}
+    def job_wrapper(roi, img_data, area_name, mouse_name):
+        """
+        Wrapper function to process each image and ROI in parallel.
+        """
+        roi_rate = area_processing(img_data["ieg"], roi, threshold, show_plot=False, silent=True)
+        return roi_rate, area_name, mouse_name
 
-    for roi, img_data, area_name, mouse_name in (
-            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True)
-    ):
-        img = img_data["ieg"]
-        roi_rate = area_processing(img, roi, threshold, show_plot=False, silent=True)
+    # One job per CPU core - 1
+    results = Parallel(n_jobs=-2, backend='threading')(
+        delayed(job_wrapper)(roi, img_data, area_name, mouse_name) for
+        roi, img_data, area_name, mouse_name in
+        batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True)
+    )
 
-        # Compute statistics
-        results['mouse_name'].append(mouse_name)
-        results['area_name'].append(area_name)
-        results['roi_rate'].append(roi_rate)
+    # Create the result dictionary
+    results_dict = {'area_name': [], 'mouse_name': [], 'roi_rate': []}
+    for rate, area_name, mouse_name in results:
+        results_dict['area_name'].append(area_name)
+        results_dict['mouse_name'].append(mouse_name)
+        results_dict['roi_rate'].append(rate)
 
-        if roi_rate < 0.0001:
-            warning(f'Very low rate ({results["roi_rate"]}) for {mouse_name} - {area_name}.')
-
-    return results
+    return results_dict
 
 
 def area_processing(
@@ -97,13 +102,20 @@ def save_all_area_scans(
     if isinstance(data_dir, str):
         data_dir = Path(data_dir)
 
-    for roi, img_data, area_name, mouse_name in (
-            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
-    ):
-        img = img_data["ieg"]
-        file_name = Path(f'area_{data_dir.name}_{mouse_name}_{area_name}.png')
-        area_processing(img, roi, threshold, show_plot=False, silent=True, save_plot_path=out_dir / file_name)
-
+    # One job per CPU core - 1
+    Parallel(n_jobs=-2, backend='threading')(
+        delayed(area_processing)(
+            img_data["ieg"],
+            roi,
+            threshold,
+            show_plot=False,
+            silent=True,
+            save_plot_path=out_dir / Path(f'area_{data_dir.name}_{mouse_name}_{area_name}.png')
+        )
+        for roi, img_data, area_name, mouse_name in (
+                batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
+        )
+    )
 
 if __name__ == '__main__':
     # Meta-parameters
