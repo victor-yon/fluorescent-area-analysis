@@ -11,6 +11,7 @@ def test_typical_single_processing():
     gaussian_sigma=1
     min_particle_size=30
     markers_percentile=90
+    rolling_ball_radius=90
 
     # Channel 1
     data = open_image('examples/crusI-left/Default/img_channel001_position000_time000000000_z000.tif')
@@ -20,7 +21,8 @@ def test_typical_single_processing():
         threshold,
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
-        markers_percentile=markers_percentile
+        markers_percentile=markers_percentile,
+        rolling_ball_radius=rolling_ball_radius
     )
 
     assert result_channel_1 == pytest.approx(269, 1)
@@ -33,7 +35,8 @@ def test_typical_single_processing():
         threshold,
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
-        markers_percentile=markers_percentile
+        markers_percentile=markers_percentile,
+        rolling_ball_radius=rolling_ball_radius
     )
 
     assert result_channel_2 == pytest.approx(73, 1)
@@ -53,7 +56,8 @@ def test_batch_processing():
         ieg_threshold=800,
         gaussian_sigma=2,
         min_particle_size=30,
-        markers_percentile=90
+        markers_percentile=90,
+        rolling_ball_radius=90
     )
 
     # Then

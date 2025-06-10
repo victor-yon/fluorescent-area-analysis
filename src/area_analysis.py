@@ -5,6 +5,7 @@ from typing import Dict, List, Any
 import numpy as np
 from joblib import Parallel, delayed
 from numpy._typing import NDArray
+from skimage import restoration
 
 from commun import open_image, open_roi, get_threshold_mask, get_roi_mask, batch_iterator, save_results
 from plots import plot_data
@@ -13,6 +14,7 @@ from plots import plot_data
 def area_batch_processing(
         data_dir: Path | str,
         threshold: int,
+        rolling_ball_radius: float | None = 90,
         mouse_filter: str = '*',
         area_filter: str = '*'
 ) -> Dict[str, List[Any]]:
@@ -34,7 +36,7 @@ def area_batch_processing(
         """
         Wrapper function to process each image and ROI in parallel.
         """
-        roi_rate = area_processing(img_data["ieg"], roi, threshold, show_plot=False, silent=True)
+        roi_rate = area_processing(img_data["ieg"], roi, threshold, rolling_ball_radius, show_plot=False, silent=True)
         return roi_rate, area_name, mouse_name
 
     # One job per CPU core - 1
@@ -58,6 +60,7 @@ def area_processing(
         data: NDArray,
         roi: NDArray,
         threshold: int,
+        rolling_ball_radius: float | None = None,
         show_plot: bool = True,
         save_plot_path: Path | str = None,
         silent: bool = False
@@ -70,9 +73,18 @@ def area_processing(
     :param threshold: The detection threshold value.
     :return: The rate of pixel above the thoreshold inside the ROI.
     """
+
+    if rolling_ball_radius:
+        # Apply rolling ball background subtraction
+        background = restoration.rolling_ball(data, radius = rolling_ball_radius)
+        # Subtract background
+        processed_data = data - background
+    else:
+        processed_data = data
+
     # Compute the masks
-    thr_mask = get_threshold_mask(data, threshold)
-    roi_mask = get_roi_mask(data, roi)
+    thr_mask = get_threshold_mask(processed_data, threshold)
+    roi_mask = get_roi_mask(processed_data, roi)
     thr_and_roi_mask = np.logical_and(thr_mask, roi_mask)
 
     # Calculate the rate of pixel above the threshold inside the ROI
@@ -88,7 +100,8 @@ def area_processing(
     # Plot the data
     if show_plot or save_plot_path is not None:
         title = f'Area scan\nThreshold: {threshold}'
-        plot_data(data, roi, thr_mask, thr_and_roi_mask, title=title, show_plot=show_plot, save_path=save_plot_path)
+        plot_data(data, processed_data, roi, thr_mask, thr_and_roi_mask, title=title, show_plot=show_plot,
+                  save_path=save_plot_path)
 
     return roi_rate
 
@@ -96,6 +109,7 @@ def save_all_area_scans(
         data_dir: Path | str,
         out_dir: Path | str,
         threshold: int,
+        rolling_ball_radius: float | None = None,
         mouse_filter: str = '*',
         area_filter: str = '*'
 ) -> None:
@@ -107,18 +121,21 @@ def save_all_area_scans(
     ):
         img = img_data["ieg"]
         file_name = Path(f'area_{data_dir.name}_{mouse_name}_{area_name}.png')
-        area_processing(img, roi, threshold, show_plot=False, silent=True, save_plot_path=out_dir / file_name)
+        area_processing(img, roi, threshold, rolling_ball_radius, show_plot=False, silent=True,
+                        save_plot_path=out_dir / file_name)
 
 
 if __name__ == '__main__':
     # Meta-parameters
     threshold = 1050
+    rolling_ball_radius = 90  # Set to None to disable rolling ball background subtraction
 
     # Plot all the data
     save_all_area_scans(
         data_dir='../data',
         out_dir='../out/area_scans',
         threshold=threshold,
+        rolling_ball_radius=rolling_ball_radius,
         mouse_filter='*',
         area_filter='*lobule8*'
     )
@@ -126,14 +143,15 @@ if __name__ == '__main__':
     # Example usage for one image and one ROI
     # example_data = open_image('tests/examples/crusI-left/Default/img_channel002_position000_time000000000_z000.tif')
     # example_roi = open_roi('tests/examples/crusI-left/Default/0982-1002.roi')
-    # area_processing(example_data, example_roi, threshold=1050)
+    # area_processing(example_data, example_roi, threshold, rolling_ball_radius)
 
     # Example usage for processing multiple images and ROIs
     # results_csv = area_batch_processing(
     #     data_dir='../data',
     #     mouse_filter='*',
     #     area_filter='*',
-    #     threshold=threshold
+    #     threshold=threshold,
+    #     rolling_ball_radius=rolling_ball_radius
     # )
     # save_results(out_directory='../out', file_name='results.csv', results=results_csv,
-    #              metadata={'threshold': threshold})
+    #              metadata={'threshold': threshold, 'rolling_ball_radius': rolling_ball_radius})

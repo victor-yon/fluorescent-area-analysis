@@ -4,6 +4,7 @@ from typing import Dict, List, Any
 
 import numpy as np
 from numpy._typing import NDArray
+from skimage import restoration
 from skimage.measure import label
 from skimage.morphology import remove_small_objects
 from skimage.segmentation import watershed
@@ -18,11 +19,12 @@ def particles_batch_processing(
         data_dir: Path | str,
         mouse_filter: str = '*',
         area_filter: str = '*',
-        dapi_threshold=1624,
-        ieg_threshold=800,
-        gaussian_sigma=2,
-        min_particle_size=30,
-        markers_percentile=90
+        dapi_threshold: int= 1624,
+        ieg_threshold: int = 800,
+        gaussian_sigma: float = 2,
+        min_particle_size: float = 30,
+        markers_percentile: float = 90,
+        rolling_ball_radius: float | None = 90
 ) -> Dict[str, List[Any]]:
     """
     Analyze all the data from the directories matching the filters.
@@ -55,6 +57,7 @@ def particles_batch_processing(
                 gaussian_sigma=gaussian_sigma,
                 min_particle_size=min_particle_size,
                 markers_percentile=markers_percentile,
+                rolling_ball_radius=rolling_ball_radius,
                 show_plot=False,
                 silent=True
             ))
@@ -81,12 +84,22 @@ def particles_processing(
         gaussian_sigma: float,
         min_particle_size: float,
         markers_percentile: float,
+        rolling_ball_radius: float | None = None,
         show_plot: bool = True,
         save_plot_path: Path | str = None,
         silent: bool = False
 ) -> int:
+
+    if rolling_ball_radius:
+        # Apply rolling ball background subtraction
+        background = restoration.rolling_ball(data, radius = rolling_ball_radius)
+        # Subtract background
+        processed_data = data - background
+    else:
+        processed_data = data
+
     # Apply Gaussian filter
-    blurred = gaussian_filter(data, sigma=gaussian_sigma)
+    blurred = gaussian_filter(processed_data, sigma=gaussian_sigma)
 
     # Apply thresholding and ROI mask
     thr_mask = get_threshold_mask(blurred, threshold)
@@ -113,7 +126,7 @@ def particles_processing(
     if show_plot or save_plot_path is not None:
         title = (f'Particles scan\nThreshold: {threshold}, Gaussian sigma: {gaussian_sigma}, '
                  f'Min particle size: {min_particle_size}, Markers percentile: {markers_percentile}')
-        plot_data(data, roi, thr_mask, thr_and_roi_mask, labels, title=title, show_plot=show_plot,
+        plot_data(data, processed_data, roi, thr_mask, thr_and_roi_mask, labels, title=title, show_plot=show_plot,
                   save_path=save_plot_path)
 
     return num_particles
@@ -125,6 +138,7 @@ def save_all_particle_scans(
         gaussian_sigma: float,
         min_particle_size: float,
         markers_percentile: float,
+        rolling_ball_radius: float | None = 90,
         mouse_filter: str = '*',
         area_filter: str = '*'
 ) -> None:
@@ -137,16 +151,17 @@ def save_all_particle_scans(
         img = img_data["ieg"]
         file_name = Path(f'particles_{data_dir.name}_{mouse_name}_{area_name}.png')
         particles_processing(img, roi, threshold, gaussian_sigma, min_particle_size, markers_percentile,
-                             show_plot=False, silent=True, save_plot_path=out_dir / file_name)
+                             rolling_ball_radius, show_plot=False, silent=True, save_plot_path=out_dir / file_name)
 
 
 if __name__ == '__main__':
     # Meta-parameters
-    dapi_threshold=1624
-    ieg_threshold=800
-    gaussian_sigma=2
-    min_particle_size=30
-    markers_percentile=90
+    dapi_threshold = 1624
+    ieg_threshold = 800
+    gaussian_sigma = 2
+    min_particle_size = 30
+    markers_percentile = 90
+    rolling_ball_radius = 90  # Set to None to disable rolling ball background subtraction
 
     # Plot all the data
     save_all_particle_scans(
@@ -156,15 +171,16 @@ if __name__ == '__main__':
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
         markers_percentile=markers_percentile,
+        rolling_ball_radius=rolling_ball_radius,
         mouse_filter='*',
         area_filter='*lobule8*'
     )
 
     # Example usage for one image and one ROI
-    # example_data = open_image('data/L_CrusI_20x_center_left/Default/img_channel001_position000_time000000000_z000.tif')
-    # example_roi = open_roi('data/L_CrusI_20x_center_left/Default/1006-0970.roi')
-    # particles_processing(example_data, example_roi, threshold=1624,
-    #                      gaussian_sigma=2, min_particle_size=30, markers_percentile=90)
+    example_data = open_image('data/L_CrusI_20x_center_left/Default/img_channel001_position000_time000000000_z000.tif')
+    example_roi = open_roi('data/L_CrusI_20x_center_left/Default/1006-0970.roi')
+    particles_processing(example_data, example_roi, ieg_threshold, gaussian_sigma, min_particle_size,
+                         markers_percentile, rolling_ball_radius)
 
     # results_csv = particles_batch_processing(
     #     data_dir='../data',
@@ -174,7 +190,8 @@ if __name__ == '__main__':
     #     ieg_threshold=ieg_threshold,
     #     gaussian_sigma=gaussian_sigma,
     #     min_particle_size=min_particle_size,
-    #     markers_percentile=markers_percentile
+    #     markers_percentile=markers_percentile,
+    #     rolling_ball_radius=rolling_ball_radius
     # )
     #
     # save_results(out_directory='../out', file_name='particles_results.csv', results=results_csv,
@@ -183,5 +200,6 @@ if __name__ == '__main__':
     #                 'ieg_threshold': ieg_threshold,
     #                 'gaussian_sigma': gaussian_sigma,
     #                 'min_particle_size': min_particle_size,
-    #                 'markers_percentile': markers_percentile
+    #                 'markers_percentile': markers_percentile,
+    #                 'rolling_ball_radius': rolling_ball_radius
     #              })
