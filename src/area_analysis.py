@@ -102,20 +102,13 @@ def save_all_area_scans(
     if isinstance(data_dir, str):
         data_dir = Path(data_dir)
 
-    # One job per CPU core - 1
-    Parallel(n_jobs=-2, backend='threading')(
-        delayed(area_processing)(
-            img_data["ieg"],
-            roi,
-            threshold,
-            show_plot=False,
-            silent=True,
-            save_plot_path=out_dir / Path(f'area_{data_dir.name}_{mouse_name}_{area_name}.png')
-        )
-        for roi, img_data, area_name, mouse_name in (
-                batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
-        )
-    )
+    for roi, img_data, area_name, mouse_name in (
+            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
+    ):
+        img = img_data["ieg"]
+        file_name = Path(f'area_{data_dir.name}_{mouse_name}_{area_name}.png')
+        area_processing(img, roi, threshold, show_plot=False, silent=True, save_plot_path=out_dir / file_name)
+
 
 if __name__ == '__main__':
     # Meta-parameters

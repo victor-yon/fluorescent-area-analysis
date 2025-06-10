@@ -19,9 +19,9 @@ DEFAULT_CSV = 'results.csv'
 DEFAULT_OUTPUT = 'subregion_analysis.png'
 GROUP_ORDER = ['naive control', 'rotarod control', 'rotarod']
 BAR_COLORS = {
-    'naive control': '#0d3b66',  # Dark Blue
-    'rotarod control': '#17becf',  # Turquoise
-    'rotarod': '#2ca02c'  # Green
+    'naive control': '#4C72B0',  # Dark Blue
+    'rotarod control': '#DD8452',  # Green
+    'rotarod': '#55A868'  # Orange
 }
 
 def plot_data(
@@ -164,7 +164,7 @@ def plot_results(df_agg, output_path):
     Y-axis scaled to percent (0–100).
     """
     # filter subregions by keywords
-    keywords = ['lobule']
+    keywords = ['simplex', 'crus', 'paramedian', 'lobule']
     pat = '|'.join(keywords)
     df_plot = df_agg[df_agg['area_name'].str.contains(pat, case=False, na=False)].copy()
     if df_plot.empty:
@@ -182,12 +182,13 @@ def plot_results(df_agg, output_path):
 
     plt.figure(figsize=(16, 9))
     g = sns.barplot(
-        data=df_plot, x="area_name", y=f"mean_{plot_type}", hue="group", errorbar="se", palette="dark", alpha=.6
+        data=df_plot, x="area_name", y=f"mean_{plot_type}", hue="group", errorbar="se",
+        palette=BAR_COLORS, alpha=.6,
     )
 
     sns.stripplot(
         data=df_plot, x="area_name", y=f"mean_{plot_type}", hue="group",
-        linewidth=0.5, edgecolor='black', dodge=True, alpha=0.6, ax=g
+        linewidth=0.5, edgecolor='black', dodge=True, alpha=0.6, ax=g, palette=BAR_COLORS
     )
 
     # Remove extra legend handles
@@ -203,7 +204,7 @@ def plot_results(df_agg, output_path):
     if plot_type == 'roi_rate':
         g.set_ylabel('Fluorescent area of ROI', fontsize=16)
         g.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1))
-        g.set_ylim(0, 1)
+        g.set_ylim(0, .8)
     else:
         g.set_ylabel('Ratio of active cells in ROI', fontsize=16)
 
