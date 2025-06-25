@@ -1,25 +1,74 @@
 import csv
-import json
 from logging import warning
 from pathlib import Path
 from typing import Generator, Any
 
 import numpy as np
 from PIL import Image, ImageDraw
-from matplotlib import pyplot as plt
 from numpy._typing import NDArray
 from roifile import ImagejRoi
+from skimage import restoration
 
 
-def open_image(path: Path | str) -> NDArray:
+def open_image(
+        directory: Path | str,
+        channel: int,
+        rolling_ball_radius: float | None = None,
+        use_cache: bool = True
+) -> NDArray:
     """
     Open a TIF image as a numpy array.
 
-    :param path: The path to the ".tif" file.
+    :param directory: The path of the directory that contains the ".tif" file.
+    :param channel: The channel number to open (1 for DAPI, 2 for IEG).
+    :param rolling_ball_radius: The radius for the rolling ball background subtraction for pre-processing.
+        If None, no background subtraction is applied.
+    :param use_cache: If True, the processed image is cached to avoid slow reprocessing.
+
     :return A numpy array representing the image.
     """
-    img = Image.open(path)
-    return np.array(img)
+
+    if isinstance(directory, str):
+        directory = Path(directory)
+
+    if rolling_ball_radius is not None and use_cache:
+        cache_file = directory / f'img_channel{channel:03}_processed_{rolling_ball_radius:03}.npy'
+        # Check if the processed image is already cached
+        if cache_file.exists():
+            return np.load(cache_file)
+    else:
+        cache_file = None
+
+    # Search for the data file
+    data_file_pattern = f'img_channel{channel:03}*.tif'
+    data_path = list(directory.glob(data_file_pattern))
+    if len(data_path) == 1:
+        data_path = data_path[0]
+    elif len(data_path) == 0:
+        raise FileNotFoundError(
+            f'Data file not found in "{directory.resolve()}" for channel {channel}.'
+            f'Expected 1 but got 0.'
+        )
+    else:
+        raise FileNotFoundError(
+            f'Too many file found in "{directory.resolve()}" for channel {channel}.'
+            f'Expect 1 but got {len(data_path)}.'
+        )
+
+    # Load ImageJ image as a numpy array
+    data = np.array(Image.open(data_path))
+
+    if rolling_ball_radius:
+        # Apply rolling ball background subtraction
+        background = restoration.rolling_ball(data, radius = rolling_ball_radius)
+        # Subtract background
+        data = data - background
+
+        if use_cache:
+            # Save the processed image to cache
+            np.save(cache_file, data)
+
+    return data
 
 
 def open_roi(path: Path | str) -> NDArray:
@@ -104,7 +153,9 @@ def batch_iterator(
         mouse_filter: str = '*',
         area_filter: str = '*',
         dapi_channel: bool = True,
-        ieg_channel: bool = True
+        ieg_channel: bool = True,
+        rolling_ball_radius: float | None = None,
+        use_cache: bool = True
 ) -> Generator[tuple[NDArray, dict[str, NDArray], str, str], None, None]:
     """
     Open all the data from the directories matching the filters.
@@ -118,8 +169,9 @@ def batch_iterator(
     :param area_filter: The pattern to select the area subfolder to process. Where '*' is a wildcard.
     :param dapi_channel: If True, process the DAPI channel (number 1).
     :param ieg_channel: If True, process the IEG channel (number 2).
-    :param dapi_threshold: The detection threshold value for the DAPI pixels.
-    :param ieg_threshold: The detection threshold value for the IEG pixels.
+    :param rolling_ball_radius: The radius for the rolling ball background subtraction for pre-processing.
+       If None, no background subtraction is applied.
+    :param use_cache: If True, the processed image is loaded or saved from cached to avoid slow reprocessing.
     :return: A tuple containing the ROI data and a dictionary with the image data for each channel.
     """
 
@@ -183,18 +235,12 @@ def batch_iterator(
 
             img_data = {}
             for name, channel in channel_list:
-                # Search for the data file
-                data_file_pattern = f'img_channel{channel:03}*'
-                data_path = list(area_directory.glob(data_file_pattern))
-                if len(data_path) == 1:
-                    data_path = data_path[0]
-                else:
-                    warning(f'Data file "{name}" not found in "{area_directory.resolve()}", '
-                            f'with pattern "{data_file_pattern}". Expect 1 but got {len(data_path)}. '
-                            f'This experiment is skipped.')
+                try:
+                    img_data[name] = open_image(area_directory, channel, rolling_ball_radius, use_cache)
+                except FileNotFoundError as e:
+                    warning(f'Error with "{name}" image loading: {e}')
+                    img_data = {}
                     continue
-
-                img_data[name] = open_image(data_path)
 
             yield roi, img_data, area_name, mouse_directory.stem
 

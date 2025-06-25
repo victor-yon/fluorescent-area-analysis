@@ -1,20 +1,22 @@
+from pathlib import Path
+
 import pytest
 
 from commun import open_image, open_roi
 from src.particles_analysis import particles_processing, particles_batch_processing
 
 
-def test_typical_single_processing():
+def test_simple_single_processing():
     # Given
+    path = Path('examples/crusI-left/Default')
     roi = open_roi('examples/crusI-left/Default/0982-1002.roi')
     threshold = 1150
-    gaussian_sigma=1
-    min_particle_size=30
-    markers_percentile=90
-    rolling_ball_radius=90
+    gaussian_sigma = 1
+    min_particle_size = 30
+    markers_percentile = 90
 
     # Channel 1
-    data = open_image('examples/crusI-left/Default/img_channel001_position000_time000000000_z000.tif')
+    data = open_image(path, 1)
     result_channel_1 = particles_processing(
         data,
         roi,
@@ -22,13 +24,14 @@ def test_typical_single_processing():
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
         markers_percentile=markers_percentile,
-        rolling_ball_radius=rolling_ball_radius
+        show_plot=False,
+        silent=True
     )
 
     assert result_channel_1 == pytest.approx(269, 1)
 
     # Channel 2
-    data = open_image('examples/crusI-left/Default/img_channel002_position000_time000000000_z000.tif')
+    data = open_image(path, 2)
     result_channel_2 = particles_processing(
         data,
         roi,
@@ -36,7 +39,8 @@ def test_typical_single_processing():
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
         markers_percentile=markers_percentile,
-        rolling_ball_radius=rolling_ball_radius
+        show_plot=False,
+        silent=True
     )
 
     assert result_channel_2 == pytest.approx(73, 1)
@@ -57,7 +61,7 @@ def test_batch_processing():
         gaussian_sigma=2,
         min_particle_size=30,
         markers_percentile=90,
-        rolling_ball_radius=90
+        rolling_ball_radius=None
     )
 
     # Then

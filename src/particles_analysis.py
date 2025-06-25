@@ -4,7 +4,6 @@ from typing import Dict, List, Any
 
 import numpy as np
 from numpy._typing import NDArray
-from skimage import restoration
 from skimage.measure import label
 from skimage.morphology import remove_small_objects
 from skimage.segmentation import watershed
@@ -24,7 +23,8 @@ def particles_batch_processing(
         gaussian_sigma: float = 2,
         min_particle_size: float = 30,
         markers_percentile: float = 90,
-        rolling_ball_radius: float | None = 90
+        rolling_ball_radius: float | None = 90,
+        use_cache: bool = True
 ) -> Dict[str, List[Any]]:
     """
     Analyze all the data from the directories matching the filters.
@@ -34,10 +34,17 @@ def particles_batch_processing(
         - exactly one ROI file matching "*.roi"
 
     :param data_dir: The relative or absolute path to the directory that contains all the data.
-    :param threshold: The detection threshold value for the pixels.
     :param mouse_filter: The pattern to select the mouse subfolder to process. Where '*' is a wildcard.
     :param area_filter: The pattern to select the area subfolder to process. Where '*' is a wildcard.
-    :param channel: The channel number for the data file.
+    :param dapi_threshold: The detection threshold value for the DAPI channel pixels.
+    :param ieg_threshold: The detection threshold value for the IEG channel pixels.
+    :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before processing.
+    :param min_particle_size: The minimum size of particles to be considered valid.
+    :param markers_percentile: The percentile value used to generate markers for the watershed segmentation.
+    :param rolling_ball_radius: The radius for the rolling ball background subtraction for pre-processing.
+        If None, no background subtraction is applied.
+    :param use_cache: If True, use cached data if available to speed up processing.
+
     :return: The statistics as a dictionary where the keys are the field names and the values are lists of values.
     """
     # Prepare the result dictionary with empty lists
@@ -46,7 +53,8 @@ def particles_batch_processing(
 
     # Files iterator
     for roi, img_data, area_name, mouse_name in (
-            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=True)
+            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=True,
+                           rolling_ball_radius=rolling_ball_radius, use_cache=use_cache)
     ):
         # Channel iterator for one file
         for channel_name, channel_data in img_data.items():
@@ -57,7 +65,6 @@ def particles_batch_processing(
                 gaussian_sigma=gaussian_sigma,
                 min_particle_size=min_particle_size,
                 markers_percentile=markers_percentile,
-                rolling_ball_radius=rolling_ball_radius,
                 show_plot=False,
                 silent=True
             ))
@@ -84,22 +91,28 @@ def particles_processing(
         gaussian_sigma: float,
         min_particle_size: float,
         markers_percentile: float,
-        rolling_ball_radius: float | None = None,
         show_plot: bool = True,
         save_plot_path: Path | str = None,
         silent: bool = False
 ) -> int:
+    """
+    Process the data to count the number of particles in a given ROI using watershed segmentation.
 
-    if rolling_ball_radius:
-        # Apply rolling ball background subtraction
-        background = restoration.rolling_ball(data, radius = rolling_ball_radius)
-        # Subtract background
-        processed_data = data - background
-    else:
-        processed_data = data
+    :param data: The data to process, typically an image array.
+    :param roi: The region of interest (ROI) mask to apply on the data.
+    :param threshold: The detection threshold value for the pixels.
+    :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before processing.
+    :param min_particle_size: The minimum size of particles to be considered valid.
+    :param markers_percentile: The percentile value used to generate markers for the watershed segmentation.
+    :param show_plot: If True, display the plot of the data with the segmentation results.
+    :param save_plot_path: If provided, save the plot to this path.
+    :param silent: If True, suppress the output messages.
+
+    :return: The number of particles detected in the ROI.
+    """
 
     # Apply Gaussian filter
-    blurred = gaussian_filter(processed_data, sigma=gaussian_sigma)
+    blurred = gaussian_filter(data, sigma=gaussian_sigma)
 
     # Apply thresholding and ROI mask
     thr_mask = get_threshold_mask(blurred, threshold)
@@ -126,10 +139,11 @@ def particles_processing(
     if show_plot or save_plot_path is not None:
         title = (f'Particles scan\nThreshold: {threshold}, Gaussian sigma: {gaussian_sigma}, '
                  f'Min particle size: {min_particle_size}, Markers percentile: {markers_percentile}')
-        plot_data(data, processed_data, roi, thr_mask, thr_and_roi_mask, labels, title=title, show_plot=show_plot,
+        plot_data(data, roi, thr_mask, thr_and_roi_mask, labels, title=title, show_plot=show_plot,
                   save_path=save_plot_path)
 
     return num_particles
+
 
 def save_all_particle_scans(
         data_dir: Path | str,
@@ -140,66 +154,31 @@ def save_all_particle_scans(
         markers_percentile: float,
         rolling_ball_radius: float | None = 90,
         mouse_filter: str = '*',
-        area_filter: str = '*'
+        area_filter: str = '*',
+        use_cache: bool = True
 ) -> None:
+    """
+    Process all the data from the directories matching the filters and save the particle scans.
+
+    :param data_dir: The relative or absolute path to the directory that contains all the data.
+    :param out_dir: The directory where the particle scan images will be saved.
+    :param threshold: The detection threshold value for the pixels.
+    :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before processing.
+    :param min_particle_size: The minimum size of particles to be considered valid.
+    :param markers_percentile: The percentile value used to generate markers for the watershed segmentation.
+    :param rolling_ball_radius: The radius for the rolling ball background subtraction for pre-processing.
+    :param mouse_filter: The pattern to select the mouse subfolder to process. Where '*' is a wildcard.
+    :param area_filter: The pattern to select the area subfolder to process. Where '*' is a wildcard.
+    :param use_cache: If True, use cached data if available to speed up processing.
+    """
     if isinstance(data_dir, str):
         data_dir = Path(data_dir)
 
     for roi, img_data, area_name, mouse_name in (
-            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False)
+            batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False,
+                           rolling_ball_radius=rolling_ball_radius, use_cache=use_cache)
     ):
         img = img_data["ieg"]
         file_name = Path(f'particles_{data_dir.name}_{mouse_name}_{area_name}.png')
         particles_processing(img, roi, threshold, gaussian_sigma, min_particle_size, markers_percentile,
-                             rolling_ball_radius, show_plot=False, silent=True, save_plot_path=out_dir / file_name)
-
-
-if __name__ == '__main__':
-    # Meta-parameters
-    dapi_threshold = 1624
-    ieg_threshold = 800
-    gaussian_sigma = 2
-    min_particle_size = 30
-    markers_percentile = 90
-    rolling_ball_radius = 90  # Set to None to disable rolling ball background subtraction
-
-    # Plot all the data
-    save_all_particle_scans(
-        data_dir='../data',
-        out_dir='../out/particle_scans',
-        threshold=ieg_threshold,
-        gaussian_sigma=gaussian_sigma,
-        min_particle_size=min_particle_size,
-        markers_percentile=markers_percentile,
-        rolling_ball_radius=rolling_ball_radius,
-        mouse_filter='*',
-        area_filter='*lobule8*'
-    )
-
-    # Example usage for one image and one ROI
-    example_data = open_image('data/L_CrusI_20x_center_left/Default/img_channel001_position000_time000000000_z000.tif')
-    example_roi = open_roi('data/L_CrusI_20x_center_left/Default/1006-0970.roi')
-    particles_processing(example_data, example_roi, ieg_threshold, gaussian_sigma, min_particle_size,
-                         markers_percentile, rolling_ball_radius)
-
-    # results_csv = particles_batch_processing(
-    #     data_dir='../data',
-    #     mouse_filter='*',
-    #     area_filter='*',
-    #     dapi_threshold=dapi_threshold,
-    #     ieg_threshold=ieg_threshold,
-    #     gaussian_sigma=gaussian_sigma,
-    #     min_particle_size=min_particle_size,
-    #     markers_percentile=markers_percentile,
-    #     rolling_ball_radius=rolling_ball_radius
-    # )
-    #
-    # save_results(out_directory='../out', file_name='particles_results.csv', results=results_csv,
-    #              metadata={
-    #                 'dapi_threshold': dapi_threshold,
-    #                 'ieg_threshold': ieg_threshold,
-    #                 'gaussian_sigma': gaussian_sigma,
-    #                 'min_particle_size': min_particle_size,
-    #                 'markers_percentile': markers_percentile,
-    #                 'rolling_ball_radius': rolling_ball_radius
-    #              })
+                             show_plot=False, silent=True, save_plot_path=out_dir / file_name)

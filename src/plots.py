@@ -26,7 +26,6 @@ BAR_COLORS = {
 
 def plot_data(
         data: NDArray,
-        processed_data: NDArray,
         roi: NDArray,
         thr_mask: NDArray[bool],
         thr_and_roi_mask: NDArray[bool] = None,
@@ -48,12 +47,12 @@ def plot_data(
     # 1. Original Image
     x_shape, y_shape = data.shape
     axes[0, 0].imshow(data, cmap='seismic')
-    axes[0, 0].set_title(f"Original Image ({x_shape:,d}x{y_shape:,d}px)")
+    axes[0, 0].set_title(f"Image ({x_shape:,d}x{y_shape:,d}px)")
     axes[0, 0].axis('off')
 
-    # 2. Processed Image with ROI
-    axes[0, 1].imshow(processed_data, cmap='seismic')
-    axes[0, 1].set_title("Processed Image with ROI")
+    # 2. Image with ROI
+    axes[0, 1].imshow(data, cmap='seismic')
+    axes[0, 1].set_title("Image with ROI")
     roi_polygon = plt.Polygon(roi, fill=None, edgecolor='r', linewidth=2)
     axes[0, 1].add_patch(roi_polygon)
     axes[0, 1].axis('off')
