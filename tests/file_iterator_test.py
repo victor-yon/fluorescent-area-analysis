@@ -5,7 +5,7 @@ from commun import batch_iterator
 
 def test_iterate_specific_mouse():
     results = list(batch_iterator('examples', 'mouse_A'))
-    assert len(results) == 8
+    assert len(results) == 8  # One folder is "default" instead od "Default"
 
 def test_iterate_mice_filter():
     results = list(batch_iterator('examples', 'mouse*'))
@@ -42,3 +42,7 @@ def test_two_channels():
     assert roi is not None
     assert len(area_name) > 0
     assert len(mouse_directory) > 0
+
+def test_iterate_bad_format():
+    results = list(batch_iterator('examples', 'bad_data'))
+    assert len(results) == 0  # 4 bad folders are skipped

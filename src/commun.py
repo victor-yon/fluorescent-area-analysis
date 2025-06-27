@@ -214,14 +214,22 @@ def batch_iterator(
             area_name = area_directory.stem
             print(f'{i:03}/{nb_area_found:03} - {i / nb_area_found:>6.1%}: {mouse_directory.stem} - {area_name}')
 
-            area_directory = area_directory / 'Default'
+            files_directory = area_directory / 'Default'
+
+            # Try no capitalization for "Default" folder
+            if not files_directory.exists():
+                files_directory = area_directory / 'default'
+
+            if not files_directory.exists():
+                warning(f'No "Default" subfolder found in "{area_directory.resolve()}". This experiment is skipped.')
+                continue
 
             # Search for the ROI file
-            roi_path = list(area_directory.glob('*.roi'))
+            roi_path = list(files_directory.glob('*.roi'))
             if len(roi_path) == 1:
                 roi_path = roi_path[0]
             else:
-                warning(f'ROI file not found in "{area_directory.resolve()}". Expect 1 but got {len(roi_path)}. '
+                warning(f'ROI file not found in "{files_directory.resolve()}". Expect 1 but got {len(roi_path)}. '
                         f'This experiment is skipped.')
                 continue
 
@@ -234,13 +242,12 @@ def batch_iterator(
                 channel_list.append(('ieg', 2))
 
             img_data = {}
-            for name, channel in channel_list:
-                try:
-                    img_data[name] = open_image(area_directory, channel, rolling_ball_radius, use_cache)
-                except FileNotFoundError as e:
-                    warning(f'Error with "{name}" image loading: {e}')
-                    img_data = {}
-                    continue
+            try:
+                for name, channel in channel_list:
+                    img_data[name] = open_image(files_directory, channel, rolling_ball_radius, use_cache)
+            except FileNotFoundError as e:
+                warning(f'Error with image loading in "{files_directory.resolve()}":\n{e}')
+                continue
 
             yield roi, img_data, area_name, mouse_directory.stem
 
