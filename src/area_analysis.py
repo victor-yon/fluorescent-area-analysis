@@ -46,7 +46,8 @@ def area_batch_processing(
     results = Parallel(n_jobs=-2, backend='threading')(
         delayed(job_wrapper)(roi, img_data, area_name, mouse_name) for
         roi, img_data, area_name, mouse_name in
-        batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, rolling_ball_radius=rolling_ball_radius,
+        batch_iterator(data_dir, mouse_filter, area_filter, ieg_channel=True, dapi_channel=False,
+                       rolling_ball_radius=rolling_ball_radius,
                        use_cache=use_cache)
     )
 
