@@ -27,7 +27,7 @@ def extract_region(name: str) -> str:
 
 def average_regions(input_csv: str, output_csv: str):
     # 2) Load your data
-    df = pd.read_csv(input_csv)
+    df = pd.read_csv(input_csv, comment='#')
 
     # 3) Find which column contains your measurement
     #    (we look for 'roi_rate' or 'mean_roi_rate')

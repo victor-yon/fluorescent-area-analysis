@@ -120,7 +120,7 @@ def load_and_prepare(csv_path):
     """
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, comment='#')
 
     # Derive a group if missing
     if 'group' not in df.columns:
