@@ -122,6 +122,9 @@ def save_results(
         results: dict[str, Any],
         metadata: dict[str, Any] = None
 ) -> None:
+    if len(results) == 0:
+        raise ValueError('The results dictionary is empty. Nothing to save.')
+
     if isinstance(out_directory, str):
         out_directory = Path(out_directory)
 
@@ -145,7 +148,7 @@ def save_results(
         rows = zip(*results.values())
         writer.writerows(rows)
 
-    print(f'Result saved in "{file_path.resolve()}"')
+    print(f'{len(results)} rows saved in "{file_path.resolve()}"')
 
 
 def batch_iterator(

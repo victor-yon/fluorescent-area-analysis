@@ -9,13 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 from numpy._typing import NDArray
-from scipy import stats
-import tempfile
-import unittest
+
 import seaborn as sns
+import plotly.subplots
+import plotly.graph_objects as go
 
 # --- Default Configuration ---
-DEFAULT_CSV = 'results.csv'
+DEFAULT_CSV = '../out/results.csv'
 DEFAULT_OUTPUT = 'subregion_analysis.png'
 GROUP_ORDER = ['naive control', 'rotarod control', 'rotarod']
 BAR_COLORS = {
@@ -98,6 +98,87 @@ def plot_data(
     else:
         plt.close(fig)
 
+def plot_data_interactive(
+        data: NDArray,
+        roi: NDArray,
+        thr_mask: NDArray[bool],
+        thr_and_roi_mask: NDArray[bool] = None,
+        particles_labels: NDArray[bool] = None,
+        title: str = None,
+        save_path: str | Path = None
+) -> None:
+    """
+    Create an interactive plot of the original image, the original image with ROI,
+    the threshold mask, and the combined threshold & ROI mask using Plotly.
+
+    :param data: Original image data as a numpy array.
+    :param roi: ROI coordinates as a numpy array.
+    :param thr_mask: Threshold mask as a numpy array.
+    :param thr_and_roi_mask: Combined threshold and ROI mask as a numpy array.
+    :param particles_labels: Optional particle labels mask
+    :param title: Optional title for the plot
+    :param save_path: Optional path to save the plot as HTML
+    """
+    fig = plotly.subplots.make_subplots(
+        rows=2, cols=2,
+        subplot_titles=[
+            f"Image ({data.shape[0]:,d}x{data.shape[1]:,d}px)",
+            "Image with ROI",
+            "Threshold mask",
+            "Threshold & ROI mask"
+        ]
+    )
+
+    # 1. Original Image
+    fig.add_trace(
+        go.Heatmap(z=data, colorscale='RdBu', showscale=False),
+        row=1, col=1
+    )
+
+    # 2. Image with ROI
+    fig.add_trace(
+        go.Heatmap(z=data, colorscale='RdBu', showscale=False),
+        row=1, col=2
+    )
+    if roi is not None:
+        fig.add_trace(
+            go.Contour(z=roi, showscale=False, contours_coloring='lines',
+                      line_width=2, contours=dict(start=0.5, end=0.5, size=0)),
+            row=1, col=2
+        )
+
+    # 3. Threshold mask
+    fig.add_trace(
+        go.Heatmap(z=thr_mask, colorscale='RdBu', showscale=False),
+        row=2, col=1
+    )
+
+    # 4. Combined mask
+    if thr_and_roi_mask is not None:
+        fig.add_trace(
+            go.Heatmap(z=thr_and_roi_mask, colorscale='RdBu', showscale=False),
+            row=2, col=2
+        )
+
+    # Update layout
+    fig.update_layout(
+        title=title,
+        showlegend=False,
+        width=1000,
+        height=1000
+    )
+
+    # Update axes
+    for i in range(1, 3):
+        for j in range(1, 3):
+            fig.update_xaxes(showticklabels=False, row=i, col=j)
+            fig.update_yaxes(showticklabels=False, row=i, col=j)
+
+    if save_path:
+        fig.write_html(str(save_path))
+    else:
+        fig.show()
+
 def infer_group_from_mouse_name(mouse_name):
     """
     Determine the group based on substrings in mouse_id.
@@ -158,10 +239,13 @@ def load_and_prepare(csv_path):
 
     return df_agg
 
-def plot_results(df_agg, output_path):
+def _prepare_plot_data(df_agg):
     """
-    Plot bars + scatter, filtered and ordered, with colors.
-    Y-axis scaled to percent (0–100).
+    Prepare data for plotting by filtering subregions and determining plot type.
+    Returns the filtered dataframe and plot configuration.
+
+    :param df_agg: Aggregated DataFrame with the results
+    :return: Tuple of (filtered DataFrame, plot_type, y_axis_title)
     """
     # filter subregions by keywords
     keywords = ['simplex', 'crus', 'paramedian', 'lobule']
@@ -175,10 +259,21 @@ def plot_results(df_agg, output_path):
 
     if 'mean_roi_rate' in df_plot.columns:
         plot_type = 'roi_rate'
+        y_axis_title = 'Fluorescent area of ROI'
     elif 'mean_particles_rate' in df_plot.columns:
         plot_type = 'particles_rate'
+        y_axis_title = 'Ratio of active cells in ROI'
     else:
         raise ValueError("No valid columns found for plotting.")
+
+    return df_plot, plot_type, y_axis_title
+
+def plot_results(df_agg, output_path):
+    """
+    Plot bars + scatter, filtered and ordered, with colors.
+    Y-axis scaled to percent (0–100).
+    """
+    df_plot, plot_type, y_axis_title = _prepare_plot_data(df_agg)
 
     plt.figure(figsize=(16, 9))
     g = sns.barplot(
@@ -202,15 +297,94 @@ def plot_results(df_agg, output_path):
     plt.yticks(fontsize=14)
 
     if plot_type == 'roi_rate':
-        g.set_ylabel('Fluorescent area of ROI', fontsize=16)
+        g.set_ylabel(y_axis_title, fontsize=16)
         g.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1))
         g.set_ylim(0, .8)
     else:
-        g.set_ylabel('Ratio of active cells in ROI', fontsize=16)
+        g.set_ylabel(y_axis_title, fontsize=16)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=600)
     plt.show()
+
+def plot_results_interactive(df_agg, output_path: str | Path = None):
+    """
+    Create an interactive plot with bars + scatter, filtered and ordered, with colors using Plotly.
+    Y-axis scaled to percent (0–100).
+
+    :param df_agg: Aggregated DataFrame with the results
+    :param output_path: Optional path to save the plot as HTML
+    """
+    df_plot, plot_type, y_axis_title = _prepare_plot_data(df_agg)
+
+    # Create figure
+    fig = go.Figure()
+
+    # Add bars for each group
+    for group in GROUP_ORDER:
+        group_data = df_plot[df_plot['group'] == group]
+
+        # Add bar plot
+        fig.add_trace(go.Bar(
+            name=group,
+            x=group_data['area_name'],
+            y=group_data[f'mean_{plot_type}'],
+            error_y=dict(
+                type='data',
+                array=group_data[f'std_{plot_type}'] / np.sqrt(group_data['n_slices']),
+                visible=True
+            ),
+            marker_color=BAR_COLORS[group],
+            opacity=0.6
+        ))
+
+        # Add scatter points
+        fig.add_trace(go.Scatter(
+            name=group,
+            x=group_data['area_name'],
+            y=group_data[f'mean_{plot_type}'],
+            mode='markers',
+            marker=dict(
+                color=BAR_COLORS[group],
+                size=8,
+                line=dict(
+                    color='black',
+                    width=1
+                )
+            ),
+            text=group_data['mouse_name'],  # Add mouse_name as hover text
+            hovertemplate="<b>%{text}</b><br>" +  # Bold mouse name
+                         "Value: %{y:.1%}<br>" +   # Format as percentage
+                         "Area: %{customdata}<br>" +  # Show area name
+                         "<extra></extra>",        # Remove trace name from hover
+            customdata=group_data['area_name'],    # Area name for hover
+            showlegend=True
+        ))
+
+    # Update layout
+    fig.update_layout(
+        barmode='group',
+        xaxis=dict(
+            title='',
+            tickangle=45,
+            tickfont=dict(size=14)
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_title,
+                font=dict(size=16)
+            ),
+            tickfont=dict(size=14),
+            tickformat='.0%'
+        ),
+        legend=dict(
+            font=dict(size=14)
+        ),
+        width=1200,
+        height=700,
+    )
+
+    fig.show()
 
 
 if __name__ == '__main__':
@@ -221,24 +395,23 @@ if __name__ == '__main__':
     parser.add_argument('--method', choices=['anova', 'ttest'], default='anova',
                         help='Statistical test')
     parser.add_argument('--output', default=DEFAULT_OUTPUT, help='Output figure filename')
-    parser.add_argument('--test', action='store_true', help='Run unit tests')
+    parser.add_argument('--static', action='store_true', help='Run unit tests')
     args = parser.parse_args()
 
-    if args.test:
-        unittest.main(argv=[sys.argv[0]])
+    # Determine the file list
+    if args.csv:
+        files = args.csv
+    elif args.csv_dir:
+        files = glob.glob(os.path.join(args.csv_dir, '*.csv'))
     else:
-        # determine file list
-        if args.csv:
-            files = args.csv
-        elif args.csv_dir:
-            files = glob.glob(os.path.join(args.csv_dir, '*.csv'))
-        else:
-            files = [DEFAULT_CSV]
-        # load and concatenate
-        dfs = [load_and_prepare(f) for f in files]
-        df_all = pd.concat(dfs, ignore_index=True)
-        # compute and plot
-        # stats_res = compute_statistics(df_all, method=args.method)
+        files = [DEFAULT_CSV]
+    # load and concatenate
+    dfs = [load_and_prepare(f) for f in files]
+    df_all = pd.concat(dfs, ignore_index=True)
+    print(df_all.to_string())
+    # compute and plot
+    # stats_res = compute_statistics(df_all, method=args.method)
+    if args.static:
         plot_results(df_all, args.output)
-
-        print(df_all.to_string())
+    else:
+        plot_results_interactive(df_all, args.output)

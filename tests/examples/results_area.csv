@@ -1,0 +1,396 @@
+# threshold: 380
+# rolling_ball_radius: 15
+area_name,mouse_name,roi_rate
+lobule10_slice1-center,85650-2 WT M naive control,0.05154030460294051
+lobule10_slice2-center,85650-2 WT M naive control,0.07594799720593749
+lobule10_slice3-center,85650-2 WT M naive control,0.10316585855742906
+lobule2_slice1-center,85650-2 WT M naive control,0.009388904969943388
+lobule3_slice1-center,85650-2 WT M naive control,0.008085431438621565
+lobule3_slice1-left,85650-2 WT M naive control,0.003926418594551728
+lobule3_slice1-right,85650-2 WT M naive control,0.007086556776440685
+lobule3_slice2-center,85650-2 WT M naive control,0.008762150402854026
+lobule3_slice2-left,85650-2 WT M naive control,0.009433809939515543
+lobule3_slice2-right,85650-2 WT M naive control,0.009211465846928403
+lobule3_slice3-center,85650-2 WT M naive control,0.007425688032963885
+lobule3_slice3-left,85650-2 WT M naive control,0.002809231094494417
+lobule3_slice3-right,85650-2 WT M naive control,0.01011868407586537
+lobule45_slice1-center,85650-2 WT M naive control,0.006415555303285883
+lobule45_slice1-left,85650-2 WT M naive control,0.0024133072601509736
+lobule45_slice1-right,85650-2 WT M naive control,0.004318693990759653
+lobule45_slice2-center,85650-2 WT M naive control,0.038483672316890614
+lobule45_slice2-left,85650-2 WT M naive control,0.007666432544963103
+lobule45_slice2-right,85650-2 WT M naive control,0.014813276360759783
+lobule45_slice3-center,85650-2 WT M naive control,0.010190709114357774
+lobule45_slice3-left,85650-2 WT M naive control,0.003911001793179045
+lobule45_slice3-right,85650-2 WT M naive control,0.01508299850570479
+lobule6_slice1-center,85650-2 WT M naive control,0.007222060426098973
+lobule6_slice1-left,85650-2 WT M naive control,0.009040043754205243
+lobule6_slice1-right,85650-2 WT M naive control,0.004610299576186305
+lobule6_slice2-center,85650-2 WT M naive control,0.03797074414051678
+lobule6_slice2-left,85650-2 WT M naive control,0.028285503490285843
+lobule6_slice2-right,85650-2 WT M naive control,0.05106838754660595
+lobule6_slice3-center,85650-2 WT M naive control,0.014066678132090412
+lobule6_slice3-left,85650-2 WT M naive control,0.011209469160969848
+lobule6_slice3-right,85650-2 WT M naive control,0.022941586583947973
+lobule7_slice1-left,85650-2 WT M naive control,0.03343053041956057
+lobule7_slice1-right,85650-2 WT M naive control,0.013899204002314635
+lobule7_slice2-left,85650-2 WT M naive control,0.09710006356173909
+lobule7_slice2-right,85650-2 WT M naive control,0.06344104715587012
+lobule7_slice3-left,85650-2 WT M naive control,0.049408408734819186
+lobule7_slice3-right,85650-2 WT M naive control,0.018479799113810102
+lobule8_slice1-left,85650-2 WT M naive control,0.038511181412677564
+lobule8_slice1-right,85650-2 WT M naive control,0.04334751937017647
+lobule8_slice2-left,85650-2 WT M naive control,0.07508234388363562
+lobule8_slice2-right,85650-2 WT M naive control,0.09138806399080372
+lobule8_slice3-left,85650-2 WT M naive control,0.055953271565862925
+lobule8_slice3-right,85650-2 WT M naive control,0.07816702340764126
+lobule9_slice1-center,85650-2 WT M naive control,0.04642401575617903
+lobule9_slice1-left,85650-2 WT M naive control,0.03756720700073365
+lobule9_slice1-right,85650-2 WT M naive control,0.10207484637537553
+lobule9_slice2-center,85650-2 WT M naive control,0.07562827001569292
+lobule9_slice2-left,85650-2 WT M naive control,0.0675513831796467
+lobule9_slice2-right,85650-2 WT M naive control,0.13454805543551357
+lobule9_slice3-center,85650-2 WT M naive control,0.05846563286731782
+lobule9_slice3-left,85650-2 WT M naive control,0.047085796016237934
+lobule9_slice3-right,85650-2 WT M naive control,0.12044008177008687
+L_crusII_slice1-center,85650-2 WT M naive control,0.034440019934092396
+L_crusII_slice2-center,85650-2 WT M naive control,0.01707025223944891
+L_crusII_slice3-center,85650-2 WT M naive control,0.05538037268575764
+L_crusI_slice1-center,85650-2 WT M naive control,0.04453047637936503
+L_crusI_slice2-center,85650-2 WT M naive control,0.04758903314559297
+L_crusI_slice3-center,85650-2 WT M naive control,0.08710755382886898
+L_paraflocculus_slice1-center,85650-2 WT M naive control,0.05990356669969937
+L_paramedian_slice1-left,85650-2 WT M naive control,0.01232865553665768
+L_paramedian_slice1-right,85650-2 WT M naive control,0.01358204174935316
+L_paramedian_slice2-left,85650-2 WT M naive control,0.03569506647659756
+L_paramedian_slice2-right,85650-2 WT M naive control,0.024388400620697078
+L_paramedian_slice3-left,85650-2 WT M naive control,0.04323935508703941
+L_paramedian_slice3-right,85650-2 WT M naive control,0.06288572128619402
+L_simplex_slice1-center,85650-2 WT M naive control,0.02402444564830108
+L_simplex_slice2-center,85650-2 WT M naive control,0.024750432750121225
+L_simplex_slice3-center,85650-2 WT M naive control,0.007372734982222188
+lobule10_slice1-center,89887-1 WT M rotarod,0.12044214230494835
+lobule10_slice2-center,89887-1 WT M rotarod,0.12092404905256741
+lobule10_slice3-center,89887-1 WT M rotarod,0.09576747141897946
+lobule2_slice1-center,89887-1 WT M rotarod,0.12123686603410642
+lobule2_slice2-center,89887-1 WT M rotarod,0.13188553700453118
+lobule2_slice3-center,89887-1 WT M rotarod,0.14623047679670095
+lobule3_slice1-center,89887-1 WT M rotarod,0.13711944339007814
+lobule3_slice1-left,89887-1 WT M rotarod,0.13501041949640014
+lobule3_slice1-right,89887-1 WT M rotarod,0.1760044929261654
+lobule3_slice2-center,89887-1 WT M rotarod,0.13975205989898193
+lobule3_slice2-left,89887-1 WT M rotarod,0.11538666638226167
+lobule3_slice2-right,89887-1 WT M rotarod,0.16165068076545175
+lobule3_slice3-center,89887-1 WT M rotarod,0.15945138031062195
+lobule3_slice3-left,89887-1 WT M rotarod,0.2274036989224025
+lobule3_slice3-right,89887-1 WT M rotarod,0.14187000418839654
+lobule45_slice1-center,89887-1 WT M rotarod,0.1153882690151475
+lobule45_slice1-left,89887-1 WT M rotarod,0.12337659795738085
+lobule45_slice1-right,89887-1 WT M rotarod,0.07438207199066509
+lobule45_slice2-center,89887-1 WT M rotarod,0.10466839487601783
+lobule45_slice2-left,89887-1 WT M rotarod,0.09539245875905719
+lobule45_slice2-right,89887-1 WT M rotarod,0.04775494963901072
+lobule45_slice3-center,89887-1 WT M rotarod,0.06562249165492012
+lobule45_slice3-left,89887-1 WT M rotarod,0.10885511098465768
+lobule45_slice3-right,89887-1 WT M rotarod,0.10991672851538606
+lobule6_slice1-center,89887-1 WT M rotarod,0.1724721702871198
+lobule6_slice1-left,89887-1 WT M rotarod,0.14641539660632286
+lobule6_slice1-right,89887-1 WT M rotarod,0.35231544932164816
+lobule6_slice2-center,89887-1 WT M rotarod,0.16133043834208943
+lobule6_slice2-left,89887-1 WT M rotarod,0.13546998387947493
+lobule6_slice2-right,89887-1 WT M rotarod,0.3254168790031085
+lobule6_slice3-center,89887-1 WT M rotarod,0.23132430137745755
+lobule6_slice3-left,89887-1 WT M rotarod,0.09718480088258642
+lobule6_slice3-right,89887-1 WT M rotarod,0.3447071434593566
+lobule7_slice1-left,89887-1 WT M rotarod,0.27521312798041464
+lobule7_slice1-right,89887-1 WT M rotarod,0.032009760880497
+lobule7_slice2-left,89887-1 WT M rotarod,0.22535942893528604
+lobule7_slice2-right,89887-1 WT M rotarod,0.025720406488960644
+lobule7_slice3-left,89887-1 WT M rotarod,0.24851790063231274
+lobule7_slice3-right,89887-1 WT M rotarod,0.04984291327486447
+lobule8_slice1-left,89887-1 WT M rotarod,0.181075529343495
+lobule8_slice1-right,89887-1 WT M rotarod,0.23638952663132745
+lobule8_slice2-left,89887-1 WT M rotarod,0.13539997437862547
+lobule8_slice2-right,89887-1 WT M rotarod,0.2004651933570862
+lobule8_slice3-left,89887-1 WT M rotarod,0.17662194640046125
+lobule8_slice3-right,89887-1 WT M rotarod,0.1876466225527841
+lobule9_slice1-center,89887-1 WT M rotarod,0.23150786634764223
+lobule9_slice1-left,89887-1 WT M rotarod,0.2511543917045426
+lobule9_slice1-right,89887-1 WT M rotarod,0.16712154893889586
+lobule9_slice2-center,89887-1 WT M rotarod,0.16997308224683794
+lobule9_slice2-left,89887-1 WT M rotarod,0.23094034353470325
+lobule9_slice2-right,89887-1 WT M rotarod,0.16863912563690187
+lobule9_slice3-center,89887-1 WT M rotarod,0.22305408824691056
+lobule9_slice3-left,89887-1 WT M rotarod,0.27599011683555424
+lobule9_slice3-right,89887-1 WT M rotarod,0.13077447049734162
+L_crusII_slice1-center,89887-1 WT M rotarod,0.021356283757871884
+L_crusII_slice2-center,89887-1 WT M rotarod,0.022448054547290288
+L_crusII_slice3-center,89887-1 WT M rotarod,0.02876531624447693
+L_crusI_slice1-center,89887-1 WT M rotarod,0.23358074830405431
+L_crusI_slice2-center,89887-1 WT M rotarod,0.3164573655244301
+L_crusI_slice3-center,89887-1 WT M rotarod,0.34253254327439
+L_paraflocculus_slice1-center,89887-1 WT M rotarod,0.2761729465412469
+L_paraflocculus_slice2-center,89887-1 WT M rotarod,0.23856558477401324
+L_paraflocculus_slice3-center,89887-1 WT M rotarod,0.26863505350021716
+L_paramedian_slice1-left,89887-1 WT M rotarod,0.027553849743434843
+L_paramedian_slice1-right,89887-1 WT M rotarod,0.02225378386912186
+L_paramedian_slice2-left,89887-1 WT M rotarod,0.018858027214122816
+L_paramedian_slice2-right,89887-1 WT M rotarod,0.05708403340227875
+L_paramedian_slice3-left,89887-1 WT M rotarod,0.0251643349511084
+L_paramedian_slice3-right,89887-1 WT M rotarod,0.08281754994571795
+L_simplex_slice1-center,89887-1 WT M rotarod,0.03279355169167728
+L_simplex_slice2-center,89887-1 WT M rotarod,0.0425443184878215
+L_simplex_slice3-center,89887-1 WT M rotarod,0.04859496778581644
+R_crusII_slice1-center,89887-1 WT M rotarod,0.017851560308133802
+R_crusII_slice2-center,89887-1 WT M rotarod,0.014573827254996272
+R_crusII_slice3-center,89887-1 WT M rotarod,0.014699959278041963
+R_crusI_slice1-center,89887-1 WT M rotarod,0.2698730599088722
+R_crusI_slice2-center,89887-1 WT M rotarod,0.28276489428462404
+R_crusI_slice3-center,89887-1 WT M rotarod,0.24819008299093084
+R_paraflocculus_slice1-center,89887-1 WT M rotarod,0.16881877386031888
+R_paraflocculus_slice2-center,89887-1 WT M rotarod,0.06511520571160712
+R_paraflocculus_slice3-center,89887-1 WT M rotarod,0.13968239552153724
+R_paramedian_slice1-left,89887-1 WT M rotarod,0.006976271152806235
+R_paramedian_slice1-right,89887-1 WT M rotarod,0.016578500667292967
+R_paramedian_slice2-left,89887-1 WT M rotarod,0.011331850160664807
+R_paramedian_slice2-right,89887-1 WT M rotarod,0.009724703524833936
+R_paramedian_slice3-left,89887-1 WT M rotarod,0.013028083842408762
+R_paramedian_slice3-right,89887-1 WT M rotarod,0.01608186082910991
+R_simplex_slice1-center,89887-1 WT M rotarod,0.022939689369657894
+R_simplex_slice2-center,89887-1 WT M rotarod,0.016030601113018822
+R_simplex_slice3-center,89887-1 WT M rotarod,0.024437794744421655
+lobule10_slice1-center,89887-2 WT M rotarod control,0.11744452985578231
+lobule10_slice2-center,89887-2 WT M rotarod control,0.13757444049902853
+lobule10_slice3-center,89887-2 WT M rotarod control,0.1257256084842845
+lobule2_slice1-center,89887-2 WT M rotarod control,0.09799175675327021
+lobule2_slice2-center,89887-2 WT M rotarod control,0.0653961015506076
+lobule2_slice3-center,89887-2 WT M rotarod control,0.1185823271264686
+lobule3_slice1-center,89887-2 WT M rotarod control,0.12333461137063483
+lobule3_slice1-left,89887-2 WT M rotarod control,0.17471273300545112
+lobule3_slice1-right,89887-2 WT M rotarod control,0.1985744006841128
+lobule3_slice2-center,89887-2 WT M rotarod control,0.1383204989535127
+lobule3_slice2-left,89887-2 WT M rotarod control,0.13842831200029027
+lobule3_slice2-right,89887-2 WT M rotarod control,0.17427992710259177
+lobule3_slice3-center,89887-2 WT M rotarod control,0.10560972252199582
+lobule3_slice3-left,89887-2 WT M rotarod control,0.06936721781590188
+lobule3_slice3-right,89887-2 WT M rotarod control,0.10412793847395872
+lobule45_slice1-center,89887-2 WT M rotarod control,0.06096595280841241
+lobule45_slice1-left,89887-2 WT M rotarod control,0.10883763317204417
+lobule45_slice1-right,89887-2 WT M rotarod control,0.07592407366850078
+lobule45_slice2-center,89887-2 WT M rotarod control,0.08606768393589032
+lobule45_slice2-left,89887-2 WT M rotarod control,0.11273321042418193
+lobule45_slice2-right,89887-2 WT M rotarod control,0.06548355824078803
+lobule45_slice3-center,89887-2 WT M rotarod control,0.11986734452468525
+lobule45_slice3-left,89887-2 WT M rotarod control,0.10134253375525627
+lobule45_slice3-right,89887-2 WT M rotarod control,0.17539642781449297
+lobule6_slice1-center,89887-2 WT M rotarod control,0.15709117180039
+lobule6_slice1-left,89887-2 WT M rotarod control,0.0637424802516513
+lobule6_slice1-right,89887-2 WT M rotarod control,0.19840912055988208
+lobule6_slice2-center,89887-2 WT M rotarod control,0.20606603470917267
+lobule6_slice2-left,89887-2 WT M rotarod control,0.07085736962152972
+lobule6_slice2-right,89887-2 WT M rotarod control,0.24943861067831635
+lobule6_slice3-center,89887-2 WT M rotarod control,0.20025738162282247
+lobule6_slice3-left,89887-2 WT M rotarod control,0.2463796897993202
+lobule6_slice3-right,89887-2 WT M rotarod control,0.3437054011406537
+lobule7_slice1-left,89887-2 WT M rotarod control,0.13766924533121974
+lobule7_slice1-right,89887-2 WT M rotarod control,0.016987080605694337
+lobule7_slice2-left,89887-2 WT M rotarod control,0.06131163642823059
+lobule7_slice2-right,89887-2 WT M rotarod control,0.00840573313017533
+lobule7_slice3-left,89887-2 WT M rotarod control,0.2698530446612873
+lobule7_slice3-right,89887-2 WT M rotarod control,0.01727051946768733
+lobule8_slice1-left,89887-2 WT M rotarod control,0.15559827016216451
+lobule8_slice1-right,89887-2 WT M rotarod control,0.19920583704567218
+lobule8_slice2-left,89887-2 WT M rotarod control,0.12150666269741582
+lobule8_slice2-right,89887-2 WT M rotarod control,0.1367325092320386
+lobule8_slice3-left,89887-2 WT M rotarod control,0.14602376939657952
+lobule8_slice3-right,89887-2 WT M rotarod control,0.18984655314426657
+lobule9_slice1-center,89887-2 WT M rotarod control,0.13569830301610686
+lobule9_slice1-left,89887-2 WT M rotarod control,0.17165054946187255
+lobule9_slice1-right,89887-2 WT M rotarod control,0.2022498285877489
+lobule9_slice2-center,89887-2 WT M rotarod control,0.12153556126066706
+lobule9_slice2-left,89887-2 WT M rotarod control,0.1503592016321538
+lobule9_slice2-right,89887-2 WT M rotarod control,0.19317511024688358
+lobule9_slice3-center,89887-2 WT M rotarod control,0.19961867443343567
+lobule9_slice3-left,89887-2 WT M rotarod control,0.1972348097536637
+lobule9_slice3-right,89887-2 WT M rotarod control,0.15487128782796003
+L_crusII_slice1-center,89887-2 WT M rotarod control,0.014255346516040499
+L_crusII_slice2-center,89887-2 WT M rotarod control,0.03445966190541528
+L_crusII_slice3-center,89887-2 WT M rotarod control,0.038807099472885236
+L_crusI_slice1-center,89887-2 WT M rotarod control,0.24506260131453556
+L_crusI_slice2-center,89887-2 WT M rotarod control,0.3358463068560579
+L_crusI_slice3-center,89887-2 WT M rotarod control,0.36575445545203716
+L_paraflocculus_slice1-center,89887-2 WT M rotarod control,0.10240755765847545
+L_paraflocculus_slice2-center,89887-2 WT M rotarod control,0.09503479525917517
+L_paraflocculus_slice3-center,89887-2 WT M rotarod control,0.17429117333695152
+L_paramedian_slice1-left,89887-2 WT M rotarod control,0.0060650362805697395
+L_paramedian_slice1-right,89887-2 WT M rotarod control,0.02100496475776394
+L_paramedian_slice2-left,89887-2 WT M rotarod control,0.02240052629237983
+L_paramedian_slice2-right,89887-2 WT M rotarod control,0.03137138835249319
+L_paramedian_slice3-left,89887-2 WT M rotarod control,0.023313424200301403
+L_paramedian_slice3-right,89887-2 WT M rotarod control,0.05545077295317224
+L_simplex_slice1-center,89887-2 WT M rotarod control,0.022962673713364024
+L_simplex_slice2-center,89887-2 WT M rotarod control,0.06499559884815023
+L_simplex_slice3-center,89887-2 WT M rotarod control,0.03907722628532692
+R_simplex_slice1-center,89887-2 WT M rotarod control,0.12134034562737535
+lobule10_slice1-center,89887-3 WT M rotarod control,0.17691720078207565
+lobule10_slice2-center,89887-3 WT M rotarod control,0.2752054148464058
+lobule10_slice3-center,89887-3 WT M rotarod control,0.21732408852205842
+lobule2_slice1-center,89887-3 WT M rotarod control,0.039536407231537195
+lobule2_slice2-center,89887-3 WT M rotarod control,0.06630380920283166
+lobule2_slice3-center,89887-3 WT M rotarod control,0.03923639151127089
+lobule3_slice1-center,89887-3 WT M rotarod control,0.011235882393699333
+lobule3_slice1-left,89887-3 WT M rotarod control,0.012262469158129981
+lobule3_slice1-right,89887-3 WT M rotarod control,0.003869587608445906
+lobule3_slice2-center,89887-3 WT M rotarod control,0.03764542098056859
+lobule3_slice2-left,89887-3 WT M rotarod control,0.0558393697526174
+lobule3_slice2-right,89887-3 WT M rotarod control,0.017158050822540682
+lobule3_slice3-center,89887-3 WT M rotarod control,0.011536511058331707
+lobule3_slice3-left,89887-3 WT M rotarod control,0.01420199250783224
+lobule3_slice3-right,89887-3 WT M rotarod control,0.007122502196061614
+lobule45_slice1-center,89887-3 WT M rotarod control,0.03759480774310403
+lobule45_slice1-left,89887-3 WT M rotarod control,0.0220905976025613
+lobule45_slice1-right,89887-3 WT M rotarod control,0.04014535694176429
+lobule45_slice2-center,89887-3 WT M rotarod control,0.04142547651936782
+lobule45_slice2-left,89887-3 WT M rotarod control,0.05208194239476701
+lobule45_slice2-right,89887-3 WT M rotarod control,0.04501347821195999
+lobule45_slice3-center,89887-3 WT M rotarod control,0.045460041967492974
+lobule45_slice3-left,89887-3 WT M rotarod control,0.017404989921417056
+lobule45_slice3-right,89887-3 WT M rotarod control,0.04908340205648906
+lobule6_slice1-center,89887-3 WT M rotarod control,0.07368532740384671
+lobule6_slice1-left,89887-3 WT M rotarod control,0.04177998130118192
+lobule6_slice1-right,89887-3 WT M rotarod control,0.31515793427484234
+lobule6_slice2-center,89887-3 WT M rotarod control,0.09443497067753608
+lobule6_slice2-left,89887-3 WT M rotarod control,0.05714784540909452
+lobule6_slice2-right,89887-3 WT M rotarod control,0.31250918112523873
+lobule6_slice3-center,89887-3 WT M rotarod control,0.12566684681700502
+lobule6_slice3-left,89887-3 WT M rotarod control,0.0696489063376332
+lobule6_slice3-right,89887-3 WT M rotarod control,0.27970178006204677
+lobule7_slice1-left,89887-3 WT M rotarod control,0.21684521469653195
+lobule7_slice1-right,89887-3 WT M rotarod control,0.05512143228168388
+lobule7_slice2-left,89887-3 WT M rotarod control,0.23493334867200644
+lobule7_slice2-right,89887-3 WT M rotarod control,0.038189776652658096
+lobule7_slice3-left,89887-3 WT M rotarod control,0.17770008661158856
+lobule7_slice3-right,89887-3 WT M rotarod control,0.05700028943560058
+lobule8_slice1-left,89887-3 WT M rotarod control,0.15389512292945487
+lobule8_slice1-right,89887-3 WT M rotarod control,0.15887762736853148
+lobule8_slice2-left,89887-3 WT M rotarod control,0.21633452176863852
+lobule8_slice2-right,89887-3 WT M rotarod control,0.18466878888907592
+lobule8_slice3-left,89887-3 WT M rotarod control,0.19481185918254865
+lobule8_slice3-right,89887-3 WT M rotarod control,0.18096746671080866
+lobule9_slice1-center,89887-3 WT M rotarod control,0.15089005994868854
+lobule9_slice1-left,89887-3 WT M rotarod control,0.15731496233249173
+lobule9_slice1-right,89887-3 WT M rotarod control,0.30667113700494203
+lobule9_slice2-center,89887-3 WT M rotarod control,0.17198650958631567
+lobule9_slice2-left,89887-3 WT M rotarod control,0.17889475319664033
+lobule9_slice2-right,89887-3 WT M rotarod control,0.3144820898394803
+lobule9_slice3-center,89887-3 WT M rotarod control,0.141069787927551
+lobule9_slice3-left,89887-3 WT M rotarod control,0.18172107680437283
+lobule9_slice3-right,89887-3 WT M rotarod control,0.23045733437900526
+L_crusII_slice1-center,89887-3 WT M rotarod control,0.011465807109894952
+L_crusII_slice2-center,89887-3 WT M rotarod control,0.005088230898755633
+L_crusII_slice3-center,89887-3 WT M rotarod control,0.004728742483788262
+L_crusI_slice1-center,89887-3 WT M rotarod control,0.2591805578478297
+L_crusI_slice2-center,89887-3 WT M rotarod control,0.22095023292610794
+L_crusI_slice3-center,89887-3 WT M rotarod control,0.1959995355140841
+L_paraflocculus_slice1-center,89887-3 WT M rotarod control,0.3399483729662078
+L_paraflocculus_slice2-center,89887-3 WT M rotarod control,0.2347219621415321
+L_paraflocculus_slice3-center,89887-3 WT M rotarod control,0.29476899841169735
+L_paramedian_slice1-left,89887-3 WT M rotarod control,0.015569966866292551
+L_paramedian_slice1-right,89887-3 WT M rotarod control,0.02121992872307516
+L_paramedian_slice2-left,89887-3 WT M rotarod control,0.005257805831054816
+L_paramedian_slice2-right,89887-3 WT M rotarod control,0.0038241406527762395
+L_paramedian_slice3-left,89887-3 WT M rotarod control,0.006658582673116723
+L_paramedian_slice3-right,89887-3 WT M rotarod control,0.010618223971104054
+L_simplex_slice1-center,89887-3 WT M rotarod control,0.005935032051205417
+L_simplex_slice2-center,89887-3 WT M rotarod control,0.0044824977031251495
+L_simplex_slice3-center,89887-3 WT M rotarod control,0.004395288089005766
+lobule10_slice1-center,89887-4 WT M rotarod control,0.09588949159073959
+lobule10_slice2-center,89887-4 WT M rotarod control,0.09673694096096475
+lobule10_slice3-center,89887-4 WT M rotarod control,0.14693048142903822
+lobule2_slice1-center,89887-4 WT M rotarod control,0.12770642446329555
+lobule2_slice2-center,89887-4 WT M rotarod control,0.18408955887955936
+lobule2_slice3-center,89887-4 WT M rotarod control,0.15382822188860812
+lobule3_slice1-center,89887-4 WT M rotarod control,0.06686927275775542
+lobule3_slice1-left,89887-4 WT M rotarod control,0.12408312332771726
+lobule3_slice1-right,89887-4 WT M rotarod control,0.13085096275652394
+lobule3_slice2-center,89887-4 WT M rotarod control,0.11359291175635558
+lobule3_slice2-left,89887-4 WT M rotarod control,0.1842785576112296
+lobule3_slice2-right,89887-4 WT M rotarod control,0.1644553541125678
+lobule3_slice3-center,89887-4 WT M rotarod control,0.13081127943481421
+lobule3_slice3-left,89887-4 WT M rotarod control,0.21087629992175727
+lobule3_slice3-right,89887-4 WT M rotarod control,0.1621480525386978
+lobule45_slice1-center,89887-4 WT M rotarod control,0.13643250974605534
+lobule45_slice1-left,89887-4 WT M rotarod control,0.1094190203906194
+lobule45_slice1-right,89887-4 WT M rotarod control,0.10726782736904528
+lobule45_slice2-center,89887-4 WT M rotarod control,0.20796233266799605
+lobule45_slice2-left,89887-4 WT M rotarod control,0.15833047956933277
+lobule45_slice2-right,89887-4 WT M rotarod control,0.143894573021966
+lobule45_slice3-center,89887-4 WT M rotarod control,0.15848979950272632
+lobule45_slice3-left,89887-4 WT M rotarod control,0.16260364398332552
+lobule45_slice3-right,89887-4 WT M rotarod control,0.13652956665138047
+lobule6_slice1-center,89887-4 WT M rotarod control,0.246132776321753
+lobule6_slice1-left,89887-4 WT M rotarod control,0.141764012471721
+lobule6_slice1-right,89887-4 WT M rotarod control,0.2520001260852691
+lobule6_slice2-center,89887-4 WT M rotarod control,0.3687764461581004
+lobule6_slice2-left,89887-4 WT M rotarod control,0.15465860534735051
+lobule6_slice2-right,89887-4 WT M rotarod control,0.37376666755030086
+lobule6_slice3-center,89887-4 WT M rotarod control,0.30051216428693933
+lobule6_slice3-left,89887-4 WT M rotarod control,0.2082650365428004
+lobule6_slice3-right,89887-4 WT M rotarod control,0.3730087592302765
+lobule7_slice1-left,89887-4 WT M rotarod control,0.16478061709544525
+lobule7_slice1-right,89887-4 WT M rotarod control,0.010978767020402392
+lobule7_slice2-left,89887-4 WT M rotarod control,0.22559197206654735
+lobule7_slice2-right,89887-4 WT M rotarod control,0.041305057916028044
+lobule7_slice3-left,89887-4 WT M rotarod control,0.1807425976109885
+lobule7_slice3-right,89887-4 WT M rotarod control,0.03986025388458382
+lobule8_slice1-left,89887-4 WT M rotarod control,0.17701616108780585
+lobule8_slice1-right,89887-4 WT M rotarod control,0.16595800720162227
+lobule8_slice2-left,89887-4 WT M rotarod control,0.24630667556505767
+lobule8_slice2-right,89887-4 WT M rotarod control,0.2525362647298791
+lobule8_slice3-left,89887-4 WT M rotarod control,0.20809049499887822
+lobule8_slice3-right,89887-4 WT M rotarod control,0.2774996820367845
+lobule9_slice1-center,89887-4 WT M rotarod control,0.17150715851047854
+lobule9_slice1-left,89887-4 WT M rotarod control,0.18067882092081927
+lobule9_slice1-right,89887-4 WT M rotarod control,0.16376602764641238
+lobule9_slice2-center,89887-4 WT M rotarod control,0.15434391851408027
+lobule9_slice2-left,89887-4 WT M rotarod control,0.23145014400900565
+lobule9_slice2-right,89887-4 WT M rotarod control,0.1582887792930891
+lobule9_slice3-center,89887-4 WT M rotarod control,0.21837808267397402
+lobule9_slice3-left,89887-4 WT M rotarod control,0.29444939193995157
+lobule9_slice3-right,89887-4 WT M rotarod control,0.24820129586198672
+L_crusII_slice1-center,89887-4 WT M rotarod control,0.06046015186377093
+L_crusII_slice2-center,89887-4 WT M rotarod control,0.02501470681111629
+L_crusII_slice3-center,89887-4 WT M rotarod control,0.013929306859090522
+L_crusI_slice1-center,89887-4 WT M rotarod control,0.3814302396730241
+L_crusI_slice2-center,89887-4 WT M rotarod control,0.33345332919442416
+L_crusI_slice3-center,89887-4 WT M rotarod control,0.3451695841048343
+L_paraflocculus_slice1-center,89887-4 WT M rotarod control,0.1933642934460002
+L_paraflocculus_slice2-center,89887-4 WT M rotarod control,0.18733859370125472
+L_paraflocculus_slice3-center,89887-4 WT M rotarod control,0.1325067323389471
+L_paramedian_slice1-left,89887-4 WT M rotarod control,0.017765674997885433
+L_paramedian_slice1-right,89887-4 WT M rotarod control,0.00845144461650457
+L_paramedian_slice2-left,89887-4 WT M rotarod control,0.016194960345063555
+L_paramedian_slice2-right,89887-4 WT M rotarod control,0.011332473992706555
+L_paramedian_slice3-left,89887-4 WT M rotarod control,0.00958891633137426
+L_paramedian_slice3-right,89887-4 WT M rotarod control,0.01670706073352638
+L_simplex_slice1-center,89887-4 WT M rotarod control,0.0835395375004712
+L_simplex_slice2-center,89887-4 WT M rotarod control,0.03539131226274168
+L_simplex_slice3-center,89887-4 WT M rotarod control,0.05961450640127238
+R_crusII_slice1-center,89887-4 WT M rotarod control,0.0380273033838066
+R_crusII_slice2-center,89887-4 WT M rotarod control,0.00834346340460956
+R_crusII_slice3-center,89887-4 WT M rotarod control,0.005609200840573655
+R_crusI_slice1-center,89887-4 WT M rotarod control,0.3654637690585251
+R_crusI_slice2-center,89887-4 WT M rotarod control,0.29034028506028836
+R_crusI_slice3-center,89887-4 WT M rotarod control,0.23607624442276234
+R_paraflocculus_slice1-center,89887-4 WT M rotarod control,0.18442261623816691
+R_paraflocculus_slice2-center,89887-4 WT M rotarod control,0.1270859177519062
+R_paraflocculus_slice3-center,89887-4 WT M rotarod control,0.13937465306762373
+R_paramedian_slice1-left,89887-4 WT M rotarod control,0.004758659780026621
+R_paramedian_slice1-right,89887-4 WT M rotarod control,0.013022532778966747
+R_paramedian_slice2-left,89887-4 WT M rotarod control,0.0025413391859898265
+R_paramedian_slice2-right,89887-4 WT M rotarod control,0.007690989841378617
+R_paramedian_slice3-left,89887-4 WT M rotarod control,0.0033139459343783676
+R_paramedian_slice3-right,89887-4 WT M rotarod control,0.008909835312596254
+R_simplex_slice1-center,89887-4 WT M rotarod control,0.08213821696033635
+R_simplex_slice2-center,89887-4 WT M rotarod control,0.015422411579254594
+R_simplex_slice3-center,89887-4 WT M rotarod control,0.03864836166190967
