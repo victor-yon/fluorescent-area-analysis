@@ -1,5 +1,6 @@
 data
 out
+*.bkp
 
 # Created by https://www.toptal.com/developers/gitignore/api/jetbrains+iml,python,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains+iml,python,venv
