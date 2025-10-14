@@ -1,7 +1,7 @@
 from src.commun import open_image, open_roi, save_results
 from src.particles_analysis import (
     particles_batch_processing,
-    particles_processing_dapi,
+    particles_processing_threshold,
     save_all_particle_scans,
 )
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         "data/L_CrusI_20x_center_left/Default", 1, rolling_ball_radius
     )
     example_roi = open_roi("data/L_CrusI_20x_center_left/Default/1006-0970.roi")
-    particles_processing_dapi(
+    particles_processing_threshold(
         example_data,
         example_roi,
         ieg_threshold,

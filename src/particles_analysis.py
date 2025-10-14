@@ -4,9 +4,14 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from numpy._typing import NDArray
-from scipy.ndimage import distance_transform_edt, gaussian_filter, gaussian_laplace, grey_dilation
+from scipy.ndimage import (
+    distance_transform_edt,
+    gaussian_filter,
+    gaussian_laplace,
+    grey_dilation,
+)
 from skimage.measure import label
-from skimage.morphology import remove_small_objects, disk
+from skimage.morphology import disk, remove_small_objects
 from skimage.segmentation import watershed
 
 from src.commun import batch_iterator, get_roi_mask, get_threshold_mask
@@ -47,11 +52,13 @@ def particles_batch_processing(
     :return: The statistics as a dictionary where the keys are the field names and the values are lists of values.
     """
     # Prepare the result dictionary with empty lists
-    results = {
+    results: Dict[str, List[Any]] = {
         "mouse_name": [],
         "area_name": [],
         "nb_particles_dapi": [],
         "nb_particles_ieg": [],
+        "nb_particles_ieg_gaussian_laplace": [],
+        "nb_particles_ieg_threshold": [],
         "particles_rate": [],
     }
 
@@ -66,7 +73,7 @@ def particles_batch_processing(
         use_cache=use_cache,
     ):
         # First channel (dapi)
-        num_particles_dapi, labels = particles_processing_dapi(
+        num_particles_dapi, labels = particles_processing_threshold(
             img_data["dapi"],
             roi,
             threshold=dapi_threshold,
@@ -78,16 +85,41 @@ def particles_batch_processing(
         )
         results["nb_particles_dapi"].append(num_particles_dapi)
 
-        # Second channel (ieg)
-        num_particles_ieg = particles_processing_ieg(
-            img_data["ieg"],
-            roi,
-            gaussian_sigma=gaussian_sigma,
-            labels=labels,
-            show_plot=False,
-            silent=True,
+        # Second channel (ieg) with 3 methods
+        results["nb_particles_ieg"].append(
+            particles_processing_overlapping(
+                img_data["ieg"],
+                gaussian_sigma=gaussian_sigma,
+                labels=labels,
+                threshold=ieg_threshold,
+                show_plot=False,
+                silent=True,
+            )
         )
-        results["nb_particles_ieg"].append(num_particles_ieg)
+
+        results["nb_particles_ieg_threshold"].append(
+            particles_processing_threshold(
+                img_data["ieg"],
+                roi,
+                threshold=ieg_threshold,
+                gaussian_sigma=gaussian_sigma,
+                min_particle_size=min_particle_size,
+                markers_percentile=markers_percentile,
+                show_plot=False,
+                silent=True,
+            )[0]
+        )
+
+        results["nb_particles_ieg_gaussian_laplace"].append(
+            particles_processing_gaussian_laplace(
+                img_data["ieg"],
+                roi,
+                gaussian_sigma=gaussian_sigma,
+                labels=labels,
+                show_plot=False,
+                silent=True,
+            )
+        )
 
         # Compute statistics
         results["mouse_name"].append(mouse_name)
@@ -110,24 +142,7 @@ def particles_batch_processing(
     return results
 
 
-def particles_processing_common(
-    data: NDArray,
-    roi: NDArray,
-    threshold: int,
-    gaussian_sigma: float,
-) -> tuple[NDArray, NDArray]:
-    # Apply Gaussian filter
-    blurred = gaussian_filter(data, sigma=gaussian_sigma)
-
-    # Apply thresholding and ROI mask
-    thr_mask = get_threshold_mask(blurred, threshold)
-    roi_mask = get_roi_mask(blurred, roi)
-    thr_and_roi_mask = np.logical_and(thr_mask, roi_mask)
-
-    return thr_mask, thr_and_roi_mask
-
-
-def particles_processing_dapi(
+def particles_processing_threshold(
     data: NDArray,
     roi: NDArray,
     threshold: int,
@@ -155,10 +170,13 @@ def particles_processing_dapi(
     :return: The number of particles detected in the ROI and the labels of the segmented particles.
     """
 
-    # Common processing: Gaussian filter and thresholding
-    thr_mask, thr_and_roi_mask = particles_processing_common(
-        data, roi, threshold, gaussian_sigma
-    )
+    # Apply Gaussian filter
+    blurred = gaussian_filter(data, sigma=gaussian_sigma)
+
+    # Apply thresholding and ROI mask
+    thr_mask = get_threshold_mask(blurred, threshold)
+    roi_mask = get_roi_mask(blurred, roi)
+    thr_and_roi_mask = np.logical_and(thr_mask, roi_mask)
 
     # Compute the distance transform
     distance = distance_transform_edt(thr_and_roi_mask)
@@ -174,7 +192,7 @@ def particles_processing_dapi(
     num_particles = len(np.unique(labels)) - 1
 
     if not silent:
-        print(f"Number of particles in DAPI channel: {num_particles:,d}")
+        print(f"Number of particles: {num_particles:,d}")
 
     # Plot the data
     if show_plot or save_plot_path is not None:
@@ -196,7 +214,47 @@ def particles_processing_dapi(
     return num_particles, labels
 
 
-def particles_processing_ieg(
+def particles_processing_overlapping(
+    data: NDArray,
+    gaussian_sigma: float,
+    labels: NDArray,
+    threshold: int,
+    min_overlap_ratio: float | None = None,
+    show_plot: bool = True,
+    save_plot_path: Path | str | None = None,
+    silent: bool = False,
+) -> int:
+    # Apply Gaussian filter
+    blurred = gaussian_filter(data, sigma=gaussian_sigma)
+
+    # Apply thresholding and ROI mask
+    thr_mask = get_threshold_mask(blurred, threshold)
+
+    # Get unique particle labels (excluding background 0)
+    unique_labels = np.unique(labels[labels != 0])
+
+    num_particles_with_ieg = 0
+    for label_id in unique_labels:
+        # Create a mask for the current particle
+        particle_mask = labels == label_id
+
+        if min_overlap_ratio is None:
+            # Check if any pixel in the particle is above the intensity threshold
+            if np.any(thr_mask[particle_mask]):
+                num_particles_with_ieg += 1
+        # Check the ratio of pixels above the intensity threshold
+        elif (
+            np.sum(thr_mask[particle_mask]) / np.sum(particle_mask) > min_overlap_ratio
+        ):
+            num_particles_with_ieg += 1
+
+    if not silent:
+        print(f"Number of particles: {num_particles_with_ieg:,d}")
+
+    return num_particles_with_ieg
+
+
+def particles_processing_gaussian_laplace(
     data: NDArray,
     roi: NDArray,
     gaussian_sigma: float,
@@ -238,14 +296,15 @@ def particles_processing_ieg(
 
     # Apply scale-normalized Laplacian-of-Gaussian
     # The normalization (sigma^2 * LoG) makes the response scale-invariant
-    log_response = -(gaussian_sigma ** 2) * gaussian_laplace(data_filtered, sigma=gaussian_sigma)
+    log_response = -(gaussian_sigma**2) * gaussian_laplace(
+        data_filtered, sigma=gaussian_sigma
+    )
 
     # Get ROI mask to constrain analysis
     roi_mask = get_roi_mask(data, roi)
 
     # Get unique particle labels (excluding background 0)
-    unique_labels = np.unique(labels)
-    unique_labels = unique_labels[unique_labels != 0]
+    unique_labels = np.unique(labels[labels != 0])
 
     # Compute background statistics (pixels in ROI but outside any particle)
     background_mask = roi_mask & (labels == 0)
@@ -256,13 +315,12 @@ def particles_processing_ieg(
     # Threshold is background mean + N standard deviations
     log_threshold = bg_mean + intensity_threshold_sigma * bg_std
 
-    num_particles_with_ieg = 0
-
     # Dilate all particle labels at once using grey dilation (preserves label values)
     # This is much faster than dilating each particle individually
     selem = disk(expansion_radius)
     dilated_labels = grey_dilation(labels, footprint=selem)
 
+    num_particles_with_ieg = 0
     for label_id in unique_labels:
         # Get the expanded mask for this particle from the dilated labels
         # This includes all pixels that were dilated into from this particle
@@ -281,7 +339,7 @@ def particles_processing_ieg(
             num_particles_with_ieg += 1
 
     if not silent:
-        print(f"Number of particles with IEG expression: {num_particles_with_ieg:,d}")
+        print(f"Number of particles: {num_particles_with_ieg:,d}")
 
     return num_particles_with_ieg
 
@@ -326,7 +384,7 @@ def save_all_particle_scans(
     ):
         img = img_data["ieg"]
         file_name = Path(f"particles_{data_dir.name}_{mouse_name}_{area_name}.png")
-        particles_processing_dapi(
+        particles_processing_threshold(
             img,
             roi,
             threshold,
