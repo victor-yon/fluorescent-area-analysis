@@ -3,9 +3,10 @@ from pathlib import Path
 from src.commun import open_image, open_roi
 from src.particles_analysis import (
     particles_batch_processing,
-    particles_processing_gaussian_laplace,
-    particles_processing_overlapping,
-    particles_processing_threshold,
+    processing_gaussian_laplace,
+    processing_threshold_overlapping_surface,
+    processing_threshold_overlapping_watershed,
+    processing_threshold_watershed,
 )
 
 
@@ -20,14 +21,13 @@ def test_simple_single_processing():
 
     # Channel DAPI
     data = open_image(path, 1)
-    result_channel_dapi, labels = particles_processing_threshold(
+    result_channel_dapi, labels = processing_threshold_watershed(
         data,
         roi,
         threshold,
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
         markers_percentile=markers_percentile,
-        show_plot=True,
         silent=True,
     )
 
@@ -36,36 +36,45 @@ def test_simple_single_processing():
     # Channel IEG
     data = open_image(path, 2)
 
-    result_channel_ieg_overlapping = particles_processing_overlapping(
+    result_channel_ieg_overlapping_watershed = (
+        processing_threshold_overlapping_watershed(
+            data,
+            labels,
+            threshold,
+            gaussian_sigma,
+            min_particle_size,
+            markers_percentile,
+            silent=True,
+        )
+    )
+
+    result_channel_ieg_overlapping_surface = processing_threshold_overlapping_surface(
         data,
         gaussian_sigma,
         labels,
         threshold,
-        show_plot=False,
         silent=True,
     )
 
-    assert result_channel_ieg_overlapping > 0
+    assert result_channel_ieg_overlapping_surface > 0
 
-    result_channel_ieg_threshold, _ = particles_processing_threshold(
+    result_channel_ieg_threshold_watershed, _ = processing_threshold_watershed(
         data,
         roi,
         threshold,
         gaussian_sigma=gaussian_sigma,
         min_particle_size=min_particle_size,
         markers_percentile=markers_percentile,
-        show_plot=False,
         silent=True,
     )
 
-    assert result_channel_ieg_threshold > 0
+    assert result_channel_ieg_threshold_watershed > 0
 
-    result_channel_ieg_gaussian_laplace = particles_processing_gaussian_laplace(
+    result_channel_ieg_gaussian_laplace = processing_gaussian_laplace(
         data,
         roi,
         gaussian_sigma=gaussian_sigma,
         labels=labels,
-        show_plot=False,
         silent=True,
     )
 
@@ -73,10 +82,13 @@ def test_simple_single_processing():
 
     print(
         f"Results: \n\t- DAPI={result_channel_dapi}"
-        f"\n\t- IEG overlapping={result_channel_ieg_overlapping}"
-        f"\n\t- IEG threshold (legacy)={result_channel_ieg_threshold}"
+        f"\n\t- IEG overlapping_watershed={result_channel_ieg_overlapping_watershed}"
+        f"\n\t- IEG overlapping_surface={result_channel_ieg_overlapping_surface}"
+        f"\n\t- IEG threshold watershed (legacy)={result_channel_ieg_threshold_watershed}"
         f"\n\t- IEG Gaussian Laplace={result_channel_ieg_gaussian_laplace}"
     )
+
+    assert False
 
 
 def test_batch_processing():

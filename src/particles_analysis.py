@@ -15,7 +15,6 @@ from skimage.morphology import disk, remove_small_objects
 from skimage.segmentation import watershed
 
 from src.commun import batch_iterator, get_roi_mask, get_threshold_mask
-from src.plots import plot_data
 
 
 def particles_batch_processing(
@@ -73,50 +72,58 @@ def particles_batch_processing(
         use_cache=use_cache,
     ):
         # First channel (dapi)
-        num_particles_dapi, labels = particles_processing_threshold(
+        num_particles_dapi, labels = processing_threshold_watershed(
             img_data["dapi"],
             roi,
             threshold=dapi_threshold,
             gaussian_sigma=gaussian_sigma,
             min_particle_size=min_particle_size,
             markers_percentile=markers_percentile,
-            show_plot=False,
             silent=True,
         )
         results["nb_particles_dapi"].append(num_particles_dapi)
 
-        # Second channel (ieg) with 3 methods
+        # Second channel (ieg) with 4 methods
         results["nb_particles_ieg"].append(
-            particles_processing_overlapping(
+            processing_threshold_overlapping_watershed(
                 img_data["ieg"],
-                gaussian_sigma=gaussian_sigma,
-                labels=labels,
+                labels,
                 threshold=ieg_threshold,
-                show_plot=False,
+                gaussian_sigma=gaussian_sigma,
+                min_particle_size=min_particle_size,
+                markers_percentile=markers_percentile,
                 silent=True,
             )
         )
 
-        results["nb_particles_ieg_threshold"].append(
-            particles_processing_threshold(
+        results["nb_particles_ieg_overlapping_surface"].append(
+            processing_threshold_overlapping_surface(
+                img_data["ieg"],
+                gaussian_sigma=gaussian_sigma,
+                labels=labels,
+                threshold=ieg_threshold,
+                silent=True,
+            )
+        )
+
+        results["nb_particles_ieg_threshold_watershed"].append(
+            processing_threshold_watershed(
                 img_data["ieg"],
                 roi,
                 threshold=ieg_threshold,
                 gaussian_sigma=gaussian_sigma,
                 min_particle_size=min_particle_size,
                 markers_percentile=markers_percentile,
-                show_plot=False,
                 silent=True,
             )[0]
         )
 
         results["nb_particles_ieg_gaussian_laplace"].append(
-            particles_processing_gaussian_laplace(
+            processing_gaussian_laplace(
                 img_data["ieg"],
                 roi,
                 gaussian_sigma=gaussian_sigma,
                 labels=labels,
-                show_plot=False,
                 silent=True,
             )
         )
@@ -142,15 +149,38 @@ def particles_batch_processing(
     return results
 
 
-def particles_processing_threshold(
+def _threshold_watershed(
+    masked_data: NDArray,
+    min_particle_size: float,
+    markers_percentile: float,
+    silent: bool = False,
+) -> Tuple[int, NDArray]:
+    # Compute the distance transform
+    distance = distance_transform_edt(masked_data)
+
+    # Generate markers, with the Nth percentile for strong peaks
+    markers = label(distance > np.percentile(distance, markers_percentile))
+
+    # Apply watershed segmentation
+    labels = watershed(-distance, markers, mask=masked_data)
+    labels = remove_small_objects(labels, min_size=min_particle_size)
+
+    # Count the number of particles
+    num_particles = len(np.unique(labels)) - 1
+
+    if not silent:
+        print(f"Number of particles: {num_particles:,d}")
+
+    return num_particles, labels
+
+
+def processing_threshold_watershed(
     data: NDArray,
     roi: NDArray,
     threshold: int,
     gaussian_sigma: float,
     min_particle_size: float,
     markers_percentile: float,
-    show_plot: bool = True,
-    save_plot_path: Path | str | None = None,
     silent: bool = False,
 ) -> Tuple[int, NDArray]:
     """
@@ -178,50 +208,47 @@ def particles_processing_threshold(
     roi_mask = get_roi_mask(blurred, roi)
     thr_and_roi_mask = np.logical_and(thr_mask, roi_mask)
 
-    # Compute the distance transform
-    distance = distance_transform_edt(thr_and_roi_mask)
-
-    # Generate markers, with the Nth percentile for strong peaks
-    markers = label(distance > np.percentile(distance, markers_percentile))
-
-    # Apply watershed segmentation
-    labels = watershed(-distance, markers, mask=thr_and_roi_mask)
-    labels = remove_small_objects(labels, min_size=min_particle_size)
-
-    # Count the number of particles
-    num_particles = len(np.unique(labels)) - 1
-
-    if not silent:
-        print(f"Number of particles: {num_particles:,d}")
-
-    # Plot the data
-    if show_plot or save_plot_path is not None:
-        title = (
-            f"Particles scan\nThreshold: {threshold}, Gaussian sigma: {gaussian_sigma}, "
-            f"Min particle size: {min_particle_size}, Markers percentile: {markers_percentile}"
-        )
-        plot_data(
-            data,
-            roi,
-            thr_mask,
-            thr_and_roi_mask,
-            labels,
-            title=title,
-            show_plot=show_plot,
-            save_path=save_plot_path,
-        )
-
-    return num_particles, labels
+    return _threshold_watershed(
+        thr_and_roi_mask,
+        min_particle_size,
+        markers_percentile,
+        silent,
+    )
 
 
-def particles_processing_overlapping(
+def processing_threshold_overlapping_watershed(
+    data: NDArray,
+    labels: NDArray,
+    threshold: int,
+    gaussian_sigma: float,
+    min_particle_size: float,
+    markers_percentile: float,
+    silent: bool = False,
+) -> int:
+    # Apply Gaussian filter
+    blurred = gaussian_filter(data, sigma=gaussian_sigma)
+
+    # Create a mask for any pixel in the particle labels
+    particle_mask = labels > 0
+
+    # Apply thresholding and ROI mask
+    thr_mask = get_threshold_mask(blurred, threshold)
+    thr_and_particle_mask = np.logical_and(thr_mask, particle_mask)
+
+    return _threshold_watershed(
+        thr_and_particle_mask,
+        min_particle_size,
+        markers_percentile,
+        silent,
+    )[0]
+
+
+def processing_threshold_overlapping_surface(
     data: NDArray,
     gaussian_sigma: float,
     labels: NDArray,
     threshold: int,
-    min_overlap_ratio: float | None = None,
-    show_plot: bool = True,
-    save_plot_path: Path | str | None = None,
+    min_overlap_ratio: float | None = 0.1,
     silent: bool = False,
 ) -> int:
     # Apply Gaussian filter
@@ -254,15 +281,13 @@ def particles_processing_overlapping(
     return num_particles_with_ieg
 
 
-def particles_processing_gaussian_laplace(
+def processing_gaussian_laplace(
     data: NDArray,
     roi: NDArray,
     gaussian_sigma: float,
     labels: NDArray,
     expansion_radius: int = 5,
     intensity_threshold_sigma: float = 4.0,
-    show_plot: bool = True,
-    save_plot_path: Path | str | None = None,
     silent: bool = False,
 ) -> int:
     """
@@ -370,6 +395,8 @@ def save_all_particle_scans(
     :param area_filter: The pattern to select the area subfolder to process. Where '*' is a wildcard.
     :param use_cache: If True, use cached data if available to speed up processing.
     """
+    raise NotImplementedError("Function broken for now.")
+
     if isinstance(data_dir, str):
         data_dir = Path(data_dir)
 
@@ -384,14 +411,12 @@ def save_all_particle_scans(
     ):
         img = img_data["ieg"]
         file_name = Path(f"particles_{data_dir.name}_{mouse_name}_{area_name}.png")
-        particles_processing_threshold(
+        processing_threshold_watershed(
             img,
             roi,
             threshold,
             gaussian_sigma,
             min_particle_size,
             markers_percentile,
-            show_plot=False,
             silent=True,
-            save_plot_path=out_dir / file_name,
         )
