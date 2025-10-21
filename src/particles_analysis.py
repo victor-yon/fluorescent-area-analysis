@@ -150,19 +150,30 @@ def particles_batch_processing(
 
 
 def _threshold_watershed(
-    masked_data: NDArray,
+    data: NDArray,
     min_particle_size: float,
     markers_percentile: float,
     silent: bool = False,
 ) -> Tuple[int, NDArray]:
+    """
+    Internal function to apply watershed segmentation on the masked data.
+
+    :param masked_data: The binary data to process.
+    :param min_particle_size: The minimum size of particles to be considered valid.
+    :param markers_percentile: The percentile value used to generate markers for the watershed
+        segmentation.
+    :param silent: If True, suppress the output messages.
+
+    :return: The number of particles detected and the labels of the segmented particles.
+    """
     # Compute the distance transform
-    distance = distance_transform_edt(masked_data)
+    distance = distance_transform_edt(data)
 
     # Generate markers, with the Nth percentile for strong peaks
     markers = label(distance > np.percentile(distance, markers_percentile))
 
     # Apply watershed segmentation
-    labels = watershed(-distance, markers, mask=masked_data)
+    labels = watershed(-distance, markers, mask=data)
     labels = remove_small_objects(labels, min_size=min_particle_size)
 
     # Count the number of particles
@@ -193,8 +204,6 @@ def processing_threshold_watershed(
     :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before processing.
     :param min_particle_size: The minimum size of particles to be considered valid.
     :param markers_percentile: The percentile value used to generate markers for the watershed segmentation.
-    :param show_plot: If True, display the plot of the data with the segmentation results.
-    :param save_plot_path: If provided, save the plot to this path.
     :param silent: If True, suppress the output messages.
 
     :return: The number of particles detected in the ROI and the labels of the segmented particles.
@@ -225,6 +234,22 @@ def processing_threshold_overlapping_watershed(
     markers_percentile: float,
     silent: bool = False,
 ) -> int:
+    """
+    Process the data to count the number of particles with watershed segmentation that are
+    overlapping with a previous watershed segmentation.
+
+    :param data: The data to process, typically an image array.
+    :param labels: The labels of the particles from previous segmentation (e.g., DAPI channel).
+    :param threshold: The detection threshold value for the pixels.
+    :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before
+        processing.
+    :param min_particle_size: The minimum size of particles to be considered valid.
+    :param markers_percentile: The percentile value used to generate markers for the watershed
+        segmentation.
+    :param silent: If True, suppress the output messages.
+
+    :return: The number of particles.
+    """
     # Apply Gaussian filter
     blurred = gaussian_filter(data, sigma=gaussian_sigma)
 
@@ -251,6 +276,20 @@ def processing_threshold_overlapping_surface(
     min_overlap_ratio: float | None = 0.1,
     silent: bool = False,
 ) -> int:
+    """
+    Process the data to count the number of particles with intensity above a threshold
+    that are overlapping with a previous watershed segmentation.
+
+    :param data: The data to process, typically an image array.
+    :param gaussian_sigma: The sigma value for the Gaussian filter applied to the data before
+        processing.
+    :param labels: The labels of the particles from previous segmentation (e.g., DAPI channel).
+    :param threshold: The detection threshold value for the pixels.
+    :param min_overlap_ratio: The minimum ratio of pixels above the intensity threshold
+        within a particle to consider it as positive. If None, any overlap counts.
+    :param silent: If True, suppress the output messages.
+    :return: The number of particles.
+    """
     # Apply Gaussian filter
     blurred = gaussian_filter(data, sigma=gaussian_sigma)
 
