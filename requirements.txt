@@ -8,3 +8,4 @@ pandas
 seaborn
 joblib
 plotly
+svgpath2mpl

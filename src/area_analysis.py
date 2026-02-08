@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 from numpy._typing import NDArray
 
 from src.commun import batch_iterator, get_roi_mask, get_threshold_mask
-from src.plots import plot_data
+from plots.misc import plot_data
 
 
 def area_batch_processing(

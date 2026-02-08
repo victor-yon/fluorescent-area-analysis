@@ -4,7 +4,7 @@ import unittest
 
 import pandas as pd
 
-from src.plots import load_and_prepare
+from plots.misc import load_and_prepare
 
 
 class TestSubregionAnalysis(unittest.TestCase):
