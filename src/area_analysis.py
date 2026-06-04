@@ -6,8 +6,29 @@ import numpy as np
 from joblib import Parallel, delayed
 from numpy._typing import NDArray
 
-from src.commun import batch_iterator, get_roi_mask, get_threshold_mask
-from plots.misc import plot_data
+# =============================================================================
+# ANALYSIS OVERVIEW
+# =============================================================================
+# This script measures the percentage of fluorescent area within a defined
+# brain region (ROI) using the IEG channel only.
+#
+# For each image, the pipeline is:
+#
+#   1. (Optional) Subtract uneven background illumination using a rolling ball
+#      algorithm, so that only genuine fluorescent signal is measured.
+#
+#   2. Apply an intensity threshold: every pixel brighter than the threshold
+#      is classified as "fluorescent"; all others are treated as background.
+#
+#   3. Restrict the analysis to the ROI drawn in ImageJ: pixels outside the
+#      ROI are ignored.
+#
+#   4. Output → roi_rate : fraction of ROI pixels that are fluorescent
+#                          (e.g. 0.44 means 44% of the ROI is fluorescent)
+# =============================================================================
+
+from commun import batch_iterator, get_roi_mask, get_threshold_mask
+from plots import plot_data
 
 
 def area_batch_processing(
@@ -37,15 +58,14 @@ def area_batch_processing(
     """
 
     def job_wrapper(roi, img_data, area_name, mouse_name):
-        """
-        Wrapper function to process each image and ROI in parallel.
-        """
         roi_rate = area_processing(
             img_data["ieg"], roi, threshold, show_plot=False, silent=True
         )
         return roi_rate, area_name, mouse_name
 
-    # One job per CPU core - 1
+    # Process all images in parallel across CPU cores to save time.
+    # n_jobs=-2 means "use all available cores minus one" so the computer
+    # remains responsive while the analysis runs.
     results = Parallel(n_jobs=-2, backend="threading")(
         delayed(job_wrapper)(roi, img_data, area_name, mouse_name)
         for roi, img_data, area_name, mouse_name in batch_iterator(
@@ -53,13 +73,13 @@ def area_batch_processing(
             mouse_filter,
             area_filter,
             ieg_channel=True,
-            dapi_channel=False,
+            dapi_channel=False,  # area analysis uses only the IEG channel
             rolling_ball_radius=rolling_ball_radius,
             use_cache=use_cache,
         )
     )
 
-    # Create the result dictionary
+    # Collect the per-image results into a dictionary that will become the CSV
     results_dict = {"area_name": [], "mouse_name": [], "roi_rate": []}
     for rate, area_name, mouse_name in results:
         results_dict["area_name"].append(area_name)
@@ -90,12 +110,15 @@ def area_processing(
     :return: The rate of pixel above the threshold inside the ROI.
     """
 
-    # Compute the masks
+    # Create a binary mask: True for every pixel brighter than the threshold
     thr_mask = get_threshold_mask(data, threshold)
+    # Create a binary mask: True for every pixel inside the ROI polygon
     roi_mask = get_roi_mask(data, roi)
+    # Combine: True only where a pixel is BOTH fluorescent AND inside the ROI
     thr_and_roi_mask = np.logical_and(thr_mask, roi_mask)
 
-    # Calculate the rate of pixel above the threshold inside the ROI
+    # roi_rate = (fluorescent pixels inside ROI) / (total pixels inside ROI)
+    # This gives the fraction of the ROI that is fluorescent (0.0 – 1.0).
     if roi_mask.sum() == 0:
         roi_rate = 0
         error("ROI mask is empty.")
