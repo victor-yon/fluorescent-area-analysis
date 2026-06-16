@@ -451,6 +451,8 @@ clip_percentiles=(2, 98),
 
         ieg_blur = gaussian_filter(ieg, sigma=gaussian_sigma)
         ieg_thr  = get_threshold_mask(ieg_blur, ieg_threshold)
+        ieg_roi  = get_roi_mask(ieg_blur, roi)
+        ieg_mask = np.logical_and(ieg_thr, ieg_roi)
 
         # Watershed DAPI (size + circularity)
         dapi_num, dapi_labels = _threshold_watershed(
